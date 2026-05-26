@@ -1,0 +1,39 @@
+L'admin est le rôle principal:
+
+La gestion globale : 
+Il gère les informations académiques principales, 
+les inscriptions, 
+ainsi que l'ensemble des étudiants, 
+des enseignants 
+et des cours.  
+
+La gestion des étudiants : 
+Il peut ajouter un étudiant, 
+modifier ses informations, 
+consulter son profil 
+et son parcours académique complet, 
+ou encore l'associer à des cours et des groupes.  
+
+La gestion des enseignants : 
+
+Il est capable d'ajouter 
+ou modifier le profil d'un enseignant 
+et de l'associer à un ou plusieurs cours.  
+
+La gestion des cours :
+Il peut créer des cours, 
+en modifier les informations, 
+y associer un enseignant 
+et les organiser selon des catégories, 
+niveaux, semestres ou départements. 
+
+La gestion des inscriptions : 
+Il inscrit un étudiant à un cours 
+ou peut modifier/supprimer une inscription existante.  
+
+La supervision : 
+Son tableau de bord lui permet d'afficher des accès rapides vers
+la gestion des étudiants, 
+des enseignants 
+et des cours, 
+ainsi que d'observer des statistiques simples. 
