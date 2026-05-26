@@ -1,23 +1,3 @@
-//dashboard administrateur
-
-//Role = administrateur
-
-/*
-clé primaire id
-
-il a accès à pr chaque enseignant et étudiant
-gestion des cours 
-gestion des enseignants
-gestion des étudiants
-gestion des notes
-gestion des emplois du temps
-gestion des matières
-gestion des présences
-gestion des groupes 
-Accès aux infos 
-statistique simple style kpi présence note
-
-*/
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -28,222 +8,266 @@ statistique simple style kpi présence note
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   
   <style>
-    /* ── RESET ET VARIABLES SMARTCAMPUS ── */
+    /* ── RESET ET VARIABLES (Thème Accueil) ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --sky: #f0f8f8; 
+      --sky: #b8f0f0;
+      --sky-dark: #8de0e0;
       --navy: #0d1b2a;
       --teal: #0a9396;
       --teal-light: #94d2bd;
-      --white: #ffffff;
-      --border-color: #d1e8e8;
+      --white: #f8fffe;
       --alert: #e63946; 
       --warning: #f4a261;
       --success: #2a9d8f;
     }
 
-    body {
+    html, body {
+      min-height: 100vh;
       font-family: 'DM Sans', sans-serif;
       background: var(--sky);
       color: var(--navy);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding-top: 60px;
+      overflow-x: hidden;
     }
 
-    /* ── NAVBAR ── */
+    /* ── HERO BG DECORATION (Bulles de fond) ── */
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob1 { width: 480px; height: 480px; background: var(--teal); top: -100px; left: -80px; }
+    .blob2 { width: 360px; height: 360px; background: #00b4d8; bottom: 60px; right: -60px; }
+
+    /* ── NAVBAR (Identique à l'accueil) ── */
     nav {
       position: fixed; top: 0; left: 0; right: 0;
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center;
       background: var(--navy);
-      padding: 0 1.5rem;
-      height: 60px;
+      padding: 0 2rem;
+      height: 52px;
       z-index: 100;
     }
-    .nav-left, .nav-right { display: flex; align-items: center; gap: 15px; }
-    
-    .nav-btn {
-      background: transparent; color: var(--teal-light);
-      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem;
-      padding: 6px 14px; border-radius: 4px; text-transform: uppercase;
-      text-decoration: none; transition: background 0.2s, color 0.2s;
+    .nav-logo-img {
+      height: 32px;
+      margin-right: 12px;
+      border-radius: 4px;
+      object-fit: contain;
     }
-    .nav-btn:hover { background: rgba(255,255,255,0.1); color: var(--white); }
-    .nav-btn.active { background: var(--teal); color: var(--white); }
+    .nav-brand {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--white);
+      letter-spacing: 0.04em;
+    }
+    .nav-links {
+      margin-left: auto;
+      display: flex; gap: 12px; align-items: center;
+    }
+    .nav-links a {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--sky);
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 4px;
+      transition: background .2s, color .2s;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .nav-links a:hover { background: var(--teal); color: #fff; }
+    .nav-links a.active { background: var(--teal); color: #fff; }
 
-    /* Cloche de notifications */
+    /* Cloche de notifications intégrée */
     .nav-bell {
       position: relative;
-      font-size: 1.3rem;
-      color: var(--white);
+      font-size: 1.1rem;
+      color: var(--sky);
       cursor: pointer;
-      margin-right: 10px;
-      margin-left: 10px;
-      transition: transform 0.2s;
+      margin: 0 8px;
+      transition: transform 0.2s, color 0.2s;
     }
-    .nav-bell:hover { transform: scale(1.1); }
+    .nav-bell:hover { transform: scale(1.1); color: #fff; }
     .nav-bell::after {
       content: ''; position: absolute;
-      top: 0px; right: -2px;
-      width: 9px; height: 9px;
+      top: -2px; right: -2px;
+      width: 8px; height: 8px;
       background: var(--alert);
       border-radius: 50%;
       border: 2px solid var(--navy);
     }
 
-    /* Les logos à gauche */
-    .nav-logo, .nav-brand {
-      background: var(--white); color: var(--navy);
-      font-family: 'Syne', sans-serif; border-radius: 4px;
-      text-decoration: none;
-    }
-    .nav-logo { font-weight: 800; font-size: 0.8rem; padding: 5px 10px; }
-    .nav-brand { font-weight: 700; font-size: 0.95rem; padding: 5px 12px; }
-
-    /* ── LAYOUT PRINCIPAL (2 Colonnes) ── */
+    /* ── LAYOUT PRINCIPAL ── */
     .dashboard-wrapper {
-      flex: 1; width: 100%; max-width: 1300px;
-      margin: 0 auto; padding: 2rem 1.5rem 4rem 1.5rem;
-      display: grid; grid-template-columns: 1fr; gap: 3rem;
+      position: relative;
+      z-index: 1;
+      width: 100%; max-width: 1300px;
+      margin: 0 auto; 
+      padding: 5rem 1.5rem 4rem 1.5rem; /* Ajusté pour nav/footer fixes */
+      display: grid; grid-template-columns: 1fr; gap: 2.5rem;
     }
-    .main-col { display: flex; flex-direction: column; gap: 2rem; }
-    .side-col { display: flex; flex-direction: column; gap: 2rem; }
+    @media (min-width: 992px) {
+      .dashboard-wrapper { grid-template-columns: 2fr 1fr; }
+    }
+    .main-col, .side-col { display: flex; flex-direction: column; gap: 2rem; }
 
-    .section-divider { border: none; border-top: 2px solid var(--navy); margin: 0.5rem 0; }
+    /* ── STYLE GLASSMORPHISM (Widgets) ── */
+    .glass-panel {
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 16px;
+      box-shadow: 0 6px 28px rgba(0,0,0,.06);
+      padding: 1.5rem;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .glass-panel:hover {
+      box-shadow: 0 12px 36px rgba(10,147,150,.15);
+    }
 
-    /* HEADER */
-    .page-header h1 { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; }
+    /* HEADER DASHBOARD */
+    .page-header {
+      text-align: left;
+    }
+    .page-header h1 { 
+      font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; 
+      color: var(--navy); margin-bottom: 0.5rem;
+    }
     .page-header p {
-      font-size: 1.1rem; font-weight: 600; color: var(--teal); margin-top: 5px;
-      background: var(--white); display: inline-block; padding: 4px 12px;
-      border-radius: 20px; border: 1px solid var(--teal); text-transform: capitalize;
+      font-size: 0.95rem; font-weight: 600; color: var(--navy);
+      background: rgba(255,255,255,0.55); display: inline-block; padding: 6px 14px;
+      border-radius: 20px; border: 1px solid rgba(255,255,255,0.8);
+      text-transform: capitalize; backdrop-filter: blur(10px);
+    }
+
+    /* LIGNE DE SÉPARATION */
+    .section-divider { 
+      border: none; border-top: 2px solid rgba(13, 27, 42, 0.1); 
+      margin: 0.5rem 0; 
     }
 
     /* KPIs */
     .kpi-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
     .kpi-card {
-      background: var(--teal); color: var(--white); padding: 2rem; border-radius: 12px;
-      display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; 
+      text-align: center; padding: 2rem 1rem;
     }
-    .kpi-card.alt { background: var(--warning); color: var(--navy); }
-    .kpi-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
-    .kpi-value { font-size: 2.5rem; font-weight: 800; line-height: 1; }
+    .kpi-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+    .kpi-value { font-size: 2.8rem; font-weight: 800; line-height: 1; color: var(--teal); }
 
     /* ZONE ACTIONS RAPIDES & MESSAGERIE */
     .card-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
     
-    .actions-header { font-weight: 700; font-size: 0.9rem; text-transform: uppercase; color: #5a7a7a; margin-bottom: 1rem; }
-    .actions-grid { 
-      display: grid; 
-      grid-template-columns: 1fr; /* On empile les boutons pour les rendre plus grands */
-      gap: 1.2rem; 
+    .actions-header { 
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.2rem; 
+      color: var(--navy); margin-bottom: 1rem; 
     }
-    /* Nouveaux styles pour les actions rapides */
-    .action-btn {
-      background: var(--white); color: var(--navy); border: 2px solid var(--teal);
-      padding: 1.2rem; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700;
-      cursor: pointer; transition: all 0.2s;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .action-btn::after { content: '→'; font-size: 1.2rem; opacity: 0.5; transition: opacity 0.2s; }
-    .action-btn:hover { background: var(--teal); color: var(--white); }
-    .action-btn:hover::after { opacity: 1; transform: translateX(3px); }
+    .actions-grid { display: flex; flex-direction: column; gap: 1rem; }
     
-    .action-btn.primary { background: var(--teal); color: var(--white); border-color: var(--teal); }
-    .action-btn.primary:hover { background: var(--navy); border-color: var(--navy); }
-
-    /* CARTES STANDARD (Messagerie & Retours) */
-    .std-card {
-      background: var(--white); border: 1px solid var(--border-color);
-      border-radius: 12px; padding: 1.5rem;
-      display: flex; flex-direction: column; justify-content: space-between;
+    /* Boutons actions */
+    .action-btn {
+      background: rgba(255,255,255,0.7); color: var(--navy); 
+      border: 1px solid rgba(255,255,255,0.9);
+      padding: 1.2rem; border-radius: 12px; font-family: 'Syne', sans-serif; 
+      font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
     }
+    .action-btn::after { content: '→'; font-size: 1.2rem; opacity: 0.5; transition: all 0.2s; }
+    .action-btn:hover { background: var(--teal); color: var(--white); transform: translateY(-2px); }
+    .action-btn:hover::after { opacity: 1; transform: translateX(4px); }
+    
+    .action-btn.primary { 
+      background: linear-gradient(135deg, var(--teal), #00b4d8); 
+      color: var(--white); border: none; 
+    }
+    .action-btn.primary:hover {
+      box-shadow: 0 8px 24px rgba(10,147,150,.32);
+    }
+
+    /* LISTES (Messagerie & Retours) */
     .std-card h2 {
-      font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700;
-      border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px;
+      font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--navy);
+      border-bottom: 2px solid rgba(13, 27, 42, 0.1); padding-bottom: 10px; margin-bottom: 15px;
       display: flex; justify-content: space-between; align-items: center;
     }
     .std-card h2 span.badge {
-      background: var(--alert); color: var(--white); font-size: 0.8rem;
-      padding: 3px 8px; border-radius: 12px;
+      background: var(--alert); color: var(--white); font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; font-weight: 600;
     }
     
-    .list-item { padding: 12px 0; border-bottom: 1px solid var(--border-color); }
+    .list-item { padding: 12px 0; border-bottom: 1px solid rgba(13, 27, 42, 0.08); }
     .list-item:last-child { border-bottom: none; padding-bottom: 0; }
     .item-title { font-weight: 700; font-size: 0.95rem; display: block; color: var(--navy); }
-    .item-sub { font-size: 0.85rem; color: #5a7a7a; margin-top: 3px; display: block; }
+    .item-sub { font-size: 0.85rem; color: #4a6a6a; margin-top: 4px; display: block; }
     
-    /* Bouton d'accès rapide Messagerie */
     .msg-btn {
-      width: 100%; margin-top: 15px; padding: 10px; background: var(--sky);
-      color: var(--teal); font-weight: 700; border: 1px solid var(--border-color);
-      border-radius: 8px; cursor: pointer; transition: all 0.2s;
+      width: 100%; margin-top: 15px; padding: 12px; 
+      background: rgba(255,255,255,0.6); color: var(--teal); 
+      font-family: 'Syne', sans-serif; font-weight: 700; 
+      border: 1px solid rgba(10, 147, 150, 0.3); border-radius: 10px; 
+      cursor: pointer; transition: all 0.2s;
     }
     .msg-btn:hover { background: var(--teal); color: var(--white); }
 
     /* ── COLONNE DE DROITE ── */
-    .image-placeholder {
-      background: var(--white); border: 1px solid var(--border-color);
-      border-radius: 12px; padding: 1rem; text-align: center;
-    }
     .img-box {
-      width: 100%; height: 200px; background: #e0f0ef; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--teal); font-weight: 600; margin-bottom: 1rem; border: 2px dashed var(--teal-light);
+      width: 100%; height: 220px; border-radius: 12px; margin-bottom: 1rem; 
+      overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,.08);
     }
-    .image-placeholder h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; }
+    .img-box img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .image-placeholder h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; color: var(--navy); }
 
-    .activity-feed {
-      background: var(--white); border: 1px solid var(--border-color);
-      border-radius: 12px; padding: 1.5rem; flex: 1;
-    }
     .activity-feed h3 {
-      font-family: 'Syne', sans-serif; font-size: 1.2rem; margin-bottom: 1rem;
-      border-bottom: 2px solid var(--border-color); padding-bottom: 10px;
+      font-family: 'Syne', sans-serif; font-size: 1.2rem; margin-bottom: 1rem; color: var(--navy);
+      border-bottom: 2px solid rgba(13, 27, 42, 0.1); padding-bottom: 10px;
     }
-    .log-item { display: flex; gap: 10px; margin-bottom: 15px; }
-    .log-time { font-size: 0.75rem; font-weight: 700; color: var(--teal); min-width: 45px; }
-    .log-text { font-size: 0.85rem; color: var(--navy); }
-    .log-text strong { font-weight: 600; }
+    .log-item { display: flex; gap: 12px; margin-bottom: 15px; }
+    .log-time { font-size: 0.75rem; font-weight: 700; color: var(--teal); min-width: 45px; margin-top: 2px; }
+    .log-text { font-size: 0.88rem; color: var(--navy); line-height: 1.4; }
+    .log-text strong { font-weight: 700; }
 
-    /* FOOTER */
+    /* ── FOOTER (Identique à l'accueil) ── */
     footer {
-      background: var(--navy); color: var(--white); text-align: center;
-      padding: 15px; font-size: 0.9rem; margin-top: auto;
-    }
-
-    @media (min-width: 992px) {
-      .dashboard-wrapper { grid-template-columns: 2fr 1fr; }
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 42px;
+      background: var(--navy);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      color: var(--teal-light);
+      letter-spacing: 0.08em;
+      z-index: 100;
     }
   </style>
 </head>
 <body>
 
-  <!-- NAVBAR MISE À JOUR AVEC CLOCHE NOTIFICATION -->
+  <div class="bg-blob blob1"></div>
+  <div class="bg-blob blob2"></div>
+
   <nav>
-    <div class="nav-left">
-      <a href="#" class="nav-logo">SC</a>
-      <a href="#" class="nav-brand">SmartCampus</a>
-    </div>
-    <div class="nav-right">
-      <a href="#" class="nav-btn active">Tableau de bord</a>
-      <a href="#" class="nav-btn">Utilisateurs</a>
-      
-      <!-- Icône de Notification (Cloche) -->
+    <img src="C:/MAMP/htdocs/WEB_2026/logo.jpg" alt="Logo SmartCampus" class="nav-logo-img">
+    <span class="nav-brand">SmartCampus</span>
+    <div class="nav-links">
+      <a href="#" class="active">Tableau de bord</a>
       <div class="nav-bell" title="Notifications">🔔</div>
-      
-      <a href="#" class="nav-btn">Profil</a>
+      <a href="#">Profil</a>
     </div>
   </nav>
 
   <main class="dashboard-wrapper">
     
-    <!-- COLONNE GAUCHE -->
     <div class="main-col">
       
-      <!-- HEADER -->
       <div class="page-header">
         <h1>Dashboard Administrateur</h1>
         <p id="current-date">Date</p>
@@ -251,59 +275,50 @@ statistique simple style kpi présence note
 
       <hr class="section-divider">
 
-      <!-- KPIs -->
       <div class="kpi-container">
-        <div class="kpi-card alt">
-          <div class="kpi-title">KPI nb enseignant</div>
-          <div class="kpi-value">78</div>
+        <div class="glass-panel kpi-card">
+          <div class="kpi-title">Enseignants Actifs</div>
+          <div class="kpi-value">12</div>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-title">KPI nb étudiant</div>
-          <div class="kpi-value">1 254</div>
+        <div class="glass-panel kpi-card">
+          <div class="kpi-title">Étudiants Inscrits</div>
+          <div class="kpi-value">430</div>
         </div>
       </div>
 
       <hr class="section-divider">
 
-      <!-- WIDGET : ACTIONS RAPIDES & MESSAGERIE -->
       <div class="card-container">
         
-        <!-- Bloc Actions Rapides (Redimensionné) -->
         <div>
           <div class="actions-header">Actions rapides</div>
           <div class="actions-grid">
-            <button class="action-btn primary">Ajouter un utilisateur</button>
+            <button class="action-btn primary">Rechercher enseignant</button>
             <button class="action-btn">Rechercher étudiant</button>
-            <button class="action-btn">Rechercher enseignant</button>
           </div>
         </div>
 
-        <!-- Nouveau Bloc Messagerie Interne -->
-        <div class="std-card">
+        <div class="glass-panel std-card">
           <div>
-            <h2>Messagerie <span class="badge">2 non lus</span></h2>
-            
+            <h2>Rapports / Messages <span class="badge">2 non lus</span></h2>
             <div class="list-item">
-              <span class="item-title">Dr. Julian Moreau</span>
+              <span class="item-title">Enseignant : Dr. Moreau</span>
               <span class="item-sub">Sujet : Demande de modification CC1</span>
             </div>
-
             <div class="list-item">
-              <span class="item-title">BDE SmartCampus</span>
+              <span class="item-title">Étudiant : BDE</span>
               <span class="item-sub">Sujet : Autorisation événementiel</span>
             </div>
           </div>
-          
-          <button class="msg-btn">Accéder à la messagerie complète</button>
+          <button class="msg-btn">Accéder à la messagerie</button>
         </div>
 
       </div>
 
       <hr class="section-divider">
 
-      <!-- RETOURS -->
       <div class="card-container">
-        <div class="std-card">
+        <div class="glass-panel std-card">
           <h2>Retours enseignants</h2>
           <div class="list-item">
             <span class="item-title">Dr. Moreau</span>
@@ -315,7 +330,7 @@ statistique simple style kpi présence note
           </div>
         </div>
 
-        <div class="std-card">
+        <div class="glass-panel std-card">
           <h2>Retours étudiant</h2>
           <div class="list-item">
             <span class="item-title">Thomas B.</span>
@@ -330,21 +345,18 @@ statistique simple style kpi présence note
 
     </div>
 
-    <!-- COLONNE DROITE -->
     <div class="side-col">
       
-      <!-- Emplacement Image -->
-      <div class="image-placeholder">
+      <div class="glass-panel image-placeholder">
         <div class="img-box">
-          [ Emplacement Image Campus ]
+          <img src="C:/MAMP/htdocs/WEB_2026/ville-de-Bordeaux.jpg" alt="Campus">
         </div>
         <h3>Espace de Supervision</h3>
-        <p style="font-size:0.85rem; color:#5a7a7a; margin-top:5px;">Gérez l'ensemble des flux académiques depuis cette interface centralisée.</p>
+        <p style="font-size:0.85rem; color:#4a6a6a; margin-top:8px;">Gérez l'ensemble des flux académiques depuis cette interface centralisée.</p>
       </div>
 
-      <!-- Flux d'activité -->
-      <div class="activity-feed">
-        <h3>Activité Récente</h3>
+      <div class="glass-panel activity-feed">
+        <h3>Activités récentes</h3>
         <div class="log-item">
           <div class="log-time">10:42</div>
           <div class="log-text"><strong>Système :</strong> Sauvegarde automatique de la base de données.</div>
@@ -367,9 +379,7 @@ statistique simple style kpi présence note
 
   </main>
 
-  <footer>
-    footer - © 2026 SmartCampus
-  </footer>
+  <footer>© 2026 SmartCampus — Tous droits réservés</footer>
 
   <script>
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
