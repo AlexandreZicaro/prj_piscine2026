@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Menu Principal - SmartCampus</title>
+  <title>Messagerie - SmartCampus</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   
   <style>
-    /* ── RESET ET VARIABLES (Thème SmartCampus) ── */
+    /* ── RESET ET VARIABLES ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -101,109 +101,191 @@
       border: 2px solid var(--navy);
     }
 
-    /* ── LAYOUT PRINCIPAL (PAGE MENU) ── */
+    /* ── LAYOUT PRINCIPAL (MESSAGERIE) ── */
     .page-wrapper {
       position: relative;
       z-index: 1;
       width: 100%; 
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 0 auto; 
-      padding: 7rem 1.5rem 5rem 1.5rem; /* Ajusté pour nav/footer */
+      padding: 6rem 1.5rem 5rem 1.5rem;
       display: flex;
       flex-direction: column;
-      align-items: center;
     }
 
-    /* HEADER "MENU" */
-    .menu-header {
-      width: 100%;
-      margin-bottom: 3rem;
-      text-align: left;
+    /* CONTENEUR PRINCIPAL GLASSMORPHISM */
+    .messagerie-container {
+      background: rgba(255,255,255,0.65);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.08);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* Pour garder les coins arrondis */
     }
-    .menu-header h1 {
+
+    /* HEADER "messagerie" */
+    .messagerie-header {
+      padding: 20px 30px;
+      border-bottom: 2px solid rgba(13, 27, 42, 0.08);
+    }
+    .messagerie-header h1 {
       font-family: 'Syne', sans-serif;
-      font-size: 2.2rem;
+      font-size: 1.8rem;
       font-weight: 800;
       color: var(--navy);
-      display: inline-block;
-      background: rgba(255,255,255,0.55);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.7);
-      padding: 10px 30px;
+      text-transform: capitalize;
+    }
+
+    /* CORPS DE LA MESSAGERIE (2 Colonnes) */
+    .messagerie-body {
+      display: flex;
+      min-height: 550px;
+    }
+
+    /* COLONNE GAUCHE (Dossiers) */
+    .messagerie-sidebar {
+      width: 280px;
+      border-right: 2px solid rgba(13, 27, 42, 0.08);
+      background: rgba(255,255,255,0.3);
+      padding: 20px 0;
+    }
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .sidebar-menu li {
+      padding: 14px 30px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--navy);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s, color 0.2s;
+    }
+    .sidebar-menu li:hover {
+      background: rgba(10, 147, 150, 0.1);
+      color: var(--teal);
+    }
+    /* Elément sélectionné dans le sous-menu */
+    .sidebar-menu li.active {
+      background: rgba(10, 147, 150, 0.15);
+      border-left: 4px solid var(--teal);
+      color: var(--teal);
+    }
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: var(--teal);
+      color: var(--white);
+      padding: 3px 8px;
       border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      text-transform: uppercase;
     }
 
-    /* ── GRILLE DES BOUTONS DU MENU ── */
-    .menu-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 2rem;
+    /* COLONNE DROITE (Formulaire) */
+    .messagerie-content {
+      flex: 1;
+      padding: 30px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Champs de texte (Inputs & Textarea) */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .msg-input, .msg-textarea {
       width: 100%;
+      background: rgba(255,255,255,0.8);
+      border: 1.5px solid #cce0e0;
+      border-radius: 10px;
+      padding: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      color: var(--navy);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .msg-input::placeholder, .msg-textarea::placeholder {
+      color: #6b8080;
+      font-weight: 500;
+    }
+    .msg-input:focus, .msg-textarea:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(10,147,150,.12);
+      background: #ffffff;
+    }
+    .msg-textarea {
+      resize: vertical;
+      min-height: 250px;
+      flex: 1;
     }
 
-    /* CARTES DU MENU */
-    .menu-card {
+    /* Boutons d'action */
+    .msg-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .btn-pj {
+      background: transparent;
+      border: 2px dashed var(--teal);
+      color: var(--teal);
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
       display: flex;
       align-items: center;
-      gap: 20px;
-      background: rgba(255,255,255,0.55);
-      backdrop-filter: blur(14px);
-      border: 1.5px solid rgba(255,255,255,0.8);
-      border-radius: 20px;
-      padding: 24px 30px;
-      text-decoration: none;
-      color: var(--navy);
-      transition: all 0.3s ease;
-      box-shadow: 0 6px 28px rgba(0,0,0,.06);
-      position: relative;
-      overflow: hidden;
+      gap: 8px;
+    }
+    .btn-pj:hover {
+      background: rgba(10, 147, 150, 0.1);
+      transform: translateY(-2px);
     }
     
-    .menu-card::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, var(--teal) 0%, #00b4d8 100%);
-      opacity: 0;
-      transition: opacity 0.3s;
-      border-radius: 18px;
-      z-index: 0;
-    }
-
-    .menu-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 35px rgba(10,147,150,.2);
-      border-color: transparent;
-    }
-    
-    .menu-card:hover::before { opacity: 1; }
-    
-    .menu-card:hover .menu-icon, 
-    .menu-card:hover .menu-title {
-      color: var(--white);
-    }
-
-    .menu-icon {
-      font-size: 2.2rem;
-      position: relative;
-      z-index: 1;
-      transition: color 0.3s;
-    }
-
-    .menu-title {
+    .btn-submit {
+      background: linear-gradient(135deg, var(--teal), #00b4d8);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 36px;
       font-family: 'Syne', sans-serif;
-      font-size: 1.25rem;
+      font-size: 1rem;
       font-weight: 700;
-      letter-spacing: 0.03em;
-      position: relative;
-      z-index: 1;
-      transition: color 0.3s;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,.08);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(10,147,150,.3);
+    }
+    .btn-submit:active {
+      transform: translateY(0);
     }
 
-    /* Responsive : 1 colonne sur petit écran */
+    /* Responsive */
     @media (max-width: 768px) {
-      .menu-grid { grid-template-columns: 1fr; }
-      .menu-header { text-align: center; }
+      .messagerie-body { flex-direction: column; }
+      .messagerie-sidebar { width: 100%; border-right: none; border-bottom: 2px solid rgba(13, 27, 42, 0.08); }
+      .messagerie-content { padding: 20px; }
+      .msg-actions { flex-direction: column; gap: 15px; align-items: stretch; }
+      .btn-submit { width: 100%; }
     }
 
     /* ── FOOTER ── */
@@ -229,51 +311,55 @@
     <img src="C:/MAMP/htdocs/WEB_2026/logo.jpg" alt="Logo SmartCampus" class="nav-logo-img">
     <span class="nav-brand">SmartCampus</span>
     <div class="nav-links">
-      <a href="#" class="active">Menu</a>
+      <a href="menu.html">Menu</a>
       <a href="C:/MAMP/htdocs/WEB_2026/dashboard_admin.html">Tableau de bord</a>
-      <a href="#">Profil</a>
+      <a href="#" class="active">Profil : Administrateur</a>
       <div class="nav-bell" title="Notifications">🔔</div>
     </div>
   </nav>
 
   <main class="page-wrapper">
     
-    <div class="menu-header">
-      <h1>Menu</h1>
-    </div>
-
-    <div class="menu-grid">
+    <div class="messagerie-container">
       
-      <a href="C:/MAMP/htdocs/WEB_2026/dashboard_admin.html" class="menu-card">
-        <div class="menu-icon">📊</div>
-        <div class="menu-title">Tableau de bord</div>
-      </a>
+      <div class="messagerie-header">
+        <h1>messagerie</h1>
+      </div>
 
-      <a href="#" class="menu-card">
-        <div class="menu-icon">💬</div>
-        <div class="menu-title">Messagerie</div>
-      </a>
+      <div class="messagerie-body">
+        
+        <div class="messagerie-sidebar">
+          <ul class="sidebar-menu">
+            <li class="active">
+              Boite réception <span class="badge">non lus</span>
+            </li>
+            <li>Messages envoyés</li>
+            <li>Messages Automatiques</li>
+          </ul>
+        </div>
 
-      <a href="#" class="menu-card">
-        <div class="menu-icon">🎓</div>
-        <div class="menu-title">Gestion étudiants</div>
-      </a>
+        <div class="messagerie-content">
+          
+          <div class="input-group">
+            <input type="text" class="msg-input" placeholder="Destinataire" />
+          </div>
 
-      <a href="#" class="menu-card">
-        <div class="menu-icon">👨‍🏫</div>
-        <div class="menu-title">Gestion enseignant</div>
-      </a>
+          <div class="input-group">
+            <input type="text" class="msg-input" placeholder="Objet" />
+          </div>
 
-      <a href="#" class="menu-card">
-        <div class="menu-icon">📅</div>
-        <div class="menu-title">Gestion emploi du temps</div>
-      </a>
+          <div class="input-group" style="flex: 1; display: flex; flex-direction: column;">
+            <textarea class="msg-textarea" placeholder="écrivez votre message"></textarea>
+          </div>
 
-      <a href="#" class="menu-card">
-        <div class="menu-icon">📚</div>
-        <div class="menu-title">Gestion des Cours et Affectations</div>
-      </a>
+          <div class="msg-actions">
+            <button class="btn-pj">📎 Ajouter PJ</button>
+            <button class="btn-submit">Envoyer</button>
+          </div>
 
+        </div>
+
+      </div>
     </div>
 
   </main>
