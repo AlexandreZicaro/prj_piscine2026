@@ -1,2 +1,364 @@
 //basiquement un tableau des étudiants ou on peut rechercher consulter modifier et supprimer ses données
 //peut fonctionner avec des filtres, par exemple les promos, les classes 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestion Étudiants - SmartCampus</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  
+  <style>
+    /* ── RESET ET VARIABLES ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sky: #b8f0f0;
+      --sky-dark: #8de0e0;
+      --navy: #0d1b2a;
+      --teal: #0a9396;
+      --teal-light: #94d2bd;
+      --white: #f8fffe;
+      --alert: #e63946;
+      --alert-hover: #c1121f;
+      --warning: #f4a261;
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--sky);
+      color: var(--navy);
+      overflow-x: hidden;
+    }
+
+    /* ── HERO BG DECORATION ── */
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob1 { width: 480px; height: 480px; background: var(--teal); top: -100px; left: -80px; }
+    .blob2 { width: 360px; height: 360px; background: #00b4d8; bottom: 60px; right: -60px; }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; align-items: center;
+      background: var(--navy);
+      padding: 0 2rem;
+      height: 52px;
+      z-index: 100;
+    }
+    .nav-logo-img {
+      height: 32px; margin-right: 12px; border-radius: 4px; object-fit: contain;
+    }
+    .nav-brand {
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--white); letter-spacing: 0.04em;
+    }
+    .nav-links {
+      margin-left: auto; display: flex; gap: 12px; align-items: center;
+    }
+    .nav-links a {
+      font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--sky);
+      text-decoration: none; padding: 6px 14px; border-radius: 4px; transition: background .2s, color .2s;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .nav-links a:hover, .nav-links a.active { background: var(--teal); color: #fff; }
+
+    /* ── LAYOUT PRINCIPAL ── */
+    .page-wrapper {
+      position: relative; z-index: 1; width: 100%; max-width: 1200px;
+      margin: 0 auto; padding: 6rem 1.5rem 5rem 1.5rem;
+      display: flex; flex-direction: column; gap: 2rem;
+    }
+
+    /* GLASSMORPHISM PANELS */
+    .glass-panel {
+      background: rgba(255,255,255,0.65); backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.8); border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.06); padding: 1.5rem 2rem;
+    }
+
+    /* ── EN-TÊTE & ACTIONS ── */
+    .top-actions {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .page-title {
+      font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--navy);
+      background: rgba(255,255,255,0.55); padding: 10px 20px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+    }
+
+    .action-controls { display: flex; gap: 1rem; align-items: center; flex: 1; justify-content: flex-end; }
+    
+    .search-bar {
+      display: flex; align-items: center; background: rgba(255,255,255,0.8);
+      border: 1.5px solid #cce0e0; border-radius: 10px; padding: 0 14px; width: 300px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-bar:focus-within {
+      border-color: var(--teal); box-shadow: 0 0 0 3px rgba(10,147,150,.12);
+    }
+    .search-bar input {
+      border: none; background: transparent; outline: none; padding: 12px 10px; width: 100%;
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--navy);
+    }
+    .search-icon { font-size: 1.2rem; color: var(--teal); }
+
+    .btn-add {
+      background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff;
+      border: none; border-radius: 10px; padding: 12px 24px; font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.08); transition: transform .2s, box-shadow .2s;
+    }
+    .btn-add:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(10,147,150,.3); }
+
+    /* ── TABLEAU ÉTUDIANTS ── */
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th {
+      font-family: 'Syne', sans-serif; font-weight: 700; color: var(--navy);
+      padding: 15px 10px; border-bottom: 2px solid rgba(13, 27, 42, 0.2);
+    }
+    td {
+      padding: 15px 10px; border-bottom: 1px solid rgba(13, 27, 42, 0.08);
+      font-size: 0.95rem; color: var(--navy);
+    }
+    tr:hover td { background: rgba(255,255,255,0.4); cursor: pointer; }
+    
+    .action-links a {
+      color: var(--teal); font-weight: 600; text-decoration: none; margin-right: 10px; font-size: 0.85rem;
+    }
+    .action-links a:hover { text-decoration: underline; }
+
+    /* ── FICHE DÉTAILS ÉTUDIANT ── */
+    .details-grid {
+      display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; align-items: stretch;
+    }
+    .details-left { display: flex; flex-direction: column; gap: 1.5rem; }
+    .details-right {
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+      border-left: 2px solid rgba(13, 27, 42, 0.08); padding-left: 2rem;
+    }
+
+    .info-block { display: flex; justify-content: space-between; align-items: flex-start; }
+    .info-content h3 { font-family: 'Syne', sans-serif; font-size: 1.4rem; color: var(--navy); margin-bottom: 5px; }
+    .info-content p { color: #4a6a6a; font-size: 0.95rem; line-height: 1.5; }
+    .info-content strong { color: var(--navy); }
+    
+    .btn-edit {
+      background: transparent; border: 1.5px solid var(--teal); color: var(--teal);
+      padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; font-family: 'Syne', sans-serif; text-transform: uppercase;
+    }
+    .btn-edit:hover { background: var(--teal); color: var(--white); }
+
+    /* Graphique Radar (SVG) & Moyenne */
+    .stats-box { text-align: center; margin-bottom: 1rem; }
+    .stats-box .moyenne {
+      font-size: 2.5rem; font-weight: 800; color: var(--teal); font-family: 'Syne', sans-serif; line-height: 1;
+    }
+    .stats-box span { font-size: 0.9rem; font-weight: 600; color: #4a6a6a; text-transform: uppercase; }
+    
+    .radar-chart { width: 150px; height: 150px; margin: 15px 0; }
+
+    /* Zone de Danger */
+    .danger-zone {
+      width: 100%; border-top: 2px dashed rgba(230, 57, 70, 0.3); padding-top: 15px; text-align: center;
+    }
+    .btn-danger {
+      background: var(--alert); color: #fff; border: none; border-radius: 10px;
+      padding: 12px 24px; font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+      transition: background 0.2s, transform 0.2s; box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+    }
+    .btn-danger:hover { background: var(--alert-hover); transform: translateY(-2px); }
+
+    @media (max-width: 900px) {
+      .details-grid { grid-template-columns: 1fr; }
+      .details-right { border-left: none; border-top: 2px solid rgba(13, 27, 42, 0.08); padding-left: 0; padding-top: 2rem; }
+      .top-actions { flex-direction: column; align-items: flex-start; }
+      .action-controls { width: 100%; flex-wrap: wrap; }
+      .search-bar { width: 100%; }
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 42px; background: var(--navy);
+      display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem; color: var(--teal-light); letter-spacing: 0.08em; z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-blob blob1"></div>
+  <div class="bg-blob blob2"></div>
+
+  <nav>
+    <img src="C:/MAMP/htdocs/WEB_2026/logo.jpg" alt="Logo" class="nav-logo-img">
+    <span class="nav-brand">SmartCampus</span>
+    <div class="nav-links">
+      <a href="menu.html">Menu</a>
+      <a href="C:/MAMP/htdocs/WEB_2026/dashboard_admin.html">Tableau de bord</a>
+      <a href="messagerie_admin.html">Messagerie</a>
+      <a href="#" class="active">Gestion étudiants</a>
+    </div>
+  </nav>
+
+  <main class="page-wrapper">
+    
+    <div class="top-actions">
+      <div class="page-title">Gestion étudiants</div>
+      
+      <div class="action-controls">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="search" placeholder="Rechercher étudiant..." id="searchInput">
+        </div>
+        <button class="btn-add">👤+ Ajouter étudiant</button>
+      </div>
+    </div>
+
+    <div class="glass-panel table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Nom Prénom</th>
+            <th>Email</th>
+            <th>Parcours</th>
+            <th>Moyenne</th>
+            <th>Actions (CRUD)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr onclick="updateDetails('Jean Dupont', 'jean.dupont@smartcampus.fr', 'Master Informatique', '14.5')">
+            <td>Jean Dupont</td>
+            <td>jean.dupont@smartcampus.fr</td>
+            <td>Master Informatique</td>
+            <td><strong>14.5</strong></td>
+            <td class="action-links">
+              <a href="#">Éditer</a>
+              <a href="#" style="color: var(--alert);" onclick="confirmDelete(event, 'Jean Dupont')">Supprimer</a>
+            </td>
+          </tr>
+          <tr onclick="updateDetails('Sophie Martin', 'sophie.m@smartcampus.fr', 'Licence Web Design', '16.2')">
+            <td>Sophie Martin</td>
+            <td>sophie.m@smartcampus.fr</td>
+            <td>Licence Web Design</td>
+            <td><strong>16.2</strong></td>
+            <td class="action-links">
+              <a href="#">Éditer</a>
+              <a href="#" style="color: var(--alert);" onclick="confirmDelete(event, 'Sophie Martin')">Supprimer</a>
+            </td>
+          </tr>
+          <tr onclick="updateDetails('Lucas Bernard', 'lucas.b@smartcampus.fr', 'Bachelor Marketing', '12.8')">
+            <td>Lucas Bernard</td>
+            <td>lucas.b@smartcampus.fr</td>
+            <td>Bachelor Marketing</td>
+            <td><strong>12.8</strong></td>
+            <td class="action-links">
+              <a href="#">Éditer</a>
+              <a href="#" style="color: var(--alert);" onclick="confirmDelete(event, 'Lucas Bernard')">Supprimer</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="glass-panel details-grid" id="studentDetails">
+      
+      <div class="details-left">
+        
+        <div class="info-block">
+          <div class="info-content">
+            <h3 id="det-nom">Jean Dupont</h3>
+            <p id="det-email">jean.dupont@smartcampus.fr</p>
+          </div>
+          <button class="btn-edit">Modifier infos</button>
+        </div>
+
+        <div class="info-block" style="border-top: 1px solid rgba(13,27,42,0.1); padding-top: 1rem;">
+          <div class="info-content">
+            <p><strong>Ses infos :</strong></p>
+            <p>Date de naissance : 12/04/2003<br>Téléphone : 06 12 34 56 78</p>
+          </div>
+          <button class="btn-edit">Modifier infos</button>
+        </div>
+
+        <div class="info-block" style="border-top: 1px solid rgba(13,27,42,0.1); padding-top: 1rem;">
+          <div class="info-content">
+            <p><strong>Parcours académique :</strong></p>
+            <p id="det-parcours">Master Informatique (En cours)</p>
+            <p style="font-size: 0.85rem; color: #6b8080;">Ancienne école : Lycée Montaigne<br>Dernier diplôme : Licence Informatique</p>
+          </div>
+          <button class="btn-edit">Modifier ancienne école & diplôme</button>
+        </div>
+
+      </div>
+
+      <div class="details-right">
+        
+        <div class="stats-box">
+          <span>Moyenne Générale</span>
+          <div class="moyenne" id="det-moyenne">14.5</div>
+          
+          <svg class="radar-chart" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,5 95,35 80,90 20,90 5,35" fill="none" stroke="#cce0e0" stroke-width="1"/>
+            <polygon points="50,25 75,45 65,75 35,75 25,45" fill="none" stroke="#cce0e0" stroke-width="1"/>
+            <line x1="50" y1="50" x2="50" y2="5" stroke="#cce0e0" stroke-width="1"/>
+            <line x1="50" y1="50" x2="95" y2="35" stroke="#cce0e0" stroke-width="1"/>
+            <line x1="50" y1="50" x2="80" y2="90" stroke="#cce0e0" stroke-width="1"/>
+            <line x1="50" y1="50" x2="20" y2="90" stroke="#cce0e0" stroke-width="1"/>
+            <line x1="50" y1="50" x2="5" y2="35" stroke="#cce0e0" stroke-width="1"/>
+            <polygon points="50,15 80,40 70,80 30,70 15,45" fill="rgba(10, 147, 150, 0.4)" stroke="var(--teal)" stroke-width="2"/>
+          </svg>
+        </div>
+
+        <div class="danger-zone">
+          <button class="btn-danger" onclick="confirmDelete(null, document.getElementById('det-nom').innerText)">
+            🗑️ Supprimer étudiant
+          </button>
+          <p style="font-size: 0.75rem; color: #6b8080; margin-top: 8px;">Action avec sécurité (Confirmation requise)</p>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer>© 2026 SmartCampus — Tous droits réservés</footer>
+
+  <script>
+    // 1. Bouton Supprimer avec sécurité
+    function confirmDelete(event, studentName) {
+      if(event) event.stopPropagation(); // Empêche de déclencher le clic sur la ligne entière
+      const confirmation = confirm("⚠️ ATTENTION :\nÊtes-vous sûr de vouloir supprimer définitivement l'étudiant(e) " + studentName + " ?\nCette action est irréversible.");
+      
+      if(confirmation) {
+        alert("L'étudiant(e) " + studentName + " a été supprimé(e) du système.");
+        // Ici viendra le code pour supprimer de la base de données
+      }
+    }
+
+    // 2. Mettre à jour la fiche détaillée au clic sur une ligne du tableau
+    function updateDetails(nom, email, parcours, moyenne) {
+      document.getElementById('det-nom').innerText = nom;
+      document.getElementById('det-email').innerText = email;
+      document.getElementById('det-parcours').innerText = parcours + " (En cours)";
+      document.getElementById('det-moyenne').innerText = moyenne;
+      
+      // Petit effet visuel pour montrer que la fiche s'est actualisée
+      const detailsCard = document.getElementById('studentDetails');
+      detailsCard.style.opacity = '0.5';
+      setTimeout(() => { detailsCard.style.opacity = '1'; }, 150);
+    }
+  </script>
+
+</body>
+</html>
