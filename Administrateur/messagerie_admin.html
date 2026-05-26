@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menu Principal - SmartCampus</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  
+  <style>
+    /* ── RESET ET VARIABLES (Thème SmartCampus) ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sky: #b8f0f0;
+      --sky-dark: #8de0e0;
+      --navy: #0d1b2a;
+      --teal: #0a9396;
+      --teal-light: #94d2bd;
+      --white: #f8fffe;
+      --alert: #e63946;
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--sky);
+      color: var(--navy);
+      overflow-x: hidden;
+    }
+
+    /* ── HERO BG DECORATION (Bulles de fond) ── */
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob1 { width: 480px; height: 480px; background: var(--teal); top: -100px; left: -80px; }
+    .blob2 { width: 360px; height: 360px; background: #00b4d8; bottom: 60px; right: -60px; }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; align-items: center;
+      background: var(--navy);
+      padding: 0 2rem;
+      height: 52px;
+      z-index: 100;
+    }
+    .nav-logo-img {
+      height: 32px;
+      margin-right: 12px;
+      border-radius: 4px;
+      object-fit: contain;
+    }
+    .nav-brand {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--white);
+      letter-spacing: 0.04em;
+    }
+    .nav-links {
+      margin-left: auto;
+      display: flex; gap: 12px; align-items: center;
+    }
+    .nav-links a {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--sky);
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 4px;
+      transition: background .2s, color .2s;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .nav-links a:hover { background: var(--teal); color: #fff; }
+    .nav-links a.active { background: var(--teal); color: #fff; }
+
+    /* Cloche de notifications */
+    .nav-bell {
+      position: relative;
+      font-size: 1.1rem;
+      color: var(--sky);
+      cursor: pointer;
+      margin: 0 8px;
+      transition: transform 0.2s, color 0.2s;
+    }
+    .nav-bell:hover { transform: scale(1.1); color: #fff; }
+    .nav-bell::after {
+      content: ''; position: absolute;
+      top: -2px; right: -2px;
+      width: 8px; height: 8px;
+      background: var(--alert);
+      border-radius: 50%;
+      border: 2px solid var(--navy);
+    }
+
+    /* ── LAYOUT PRINCIPAL (PAGE MENU) ── */
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%; 
+      max-width: 1000px;
+      margin: 0 auto; 
+      padding: 7rem 1.5rem 5rem 1.5rem; /* Ajusté pour nav/footer */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* HEADER "MENU" */
+    .menu-header {
+      width: 100%;
+      margin-bottom: 3rem;
+      text-align: left;
+    }
+    .menu-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--navy);
+      display: inline-block;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.7);
+      padding: 10px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    /* ── GRILLE DES BOUTONS DU MENU ── */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      width: 100%;
+    }
+
+    /* CARTES DU MENU */
+    .menu-card {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(14px);
+      border: 1.5px solid rgba(255,255,255,0.8);
+      border-radius: 20px;
+      padding: 24px 30px;
+      text-decoration: none;
+      color: var(--navy);
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 28px rgba(0,0,0,.06);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .menu-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--teal) 0%, #00b4d8 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      border-radius: 18px;
+      z-index: 0;
+    }
+
+    .menu-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(10,147,150,.2);
+      border-color: transparent;
+    }
+    
+    .menu-card:hover::before { opacity: 1; }
+    
+    .menu-card:hover .menu-icon, 
+    .menu-card:hover .menu-title {
+      color: var(--white);
+    }
+
+    .menu-icon {
+      font-size: 2.2rem;
+      position: relative;
+      z-index: 1;
+      transition: color 0.3s;
+    }
+
+    .menu-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      position: relative;
+      z-index: 1;
+      transition: color 0.3s;
+    }
+
+    /* Responsive : 1 colonne sur petit écran */
+    @media (max-width: 768px) {
+      .menu-grid { grid-template-columns: 1fr; }
+      .menu-header { text-align: center; }
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 42px;
+      background: var(--navy);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      color: var(--teal-light);
+      letter-spacing: 0.08em;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-blob blob1"></div>
+  <div class="bg-blob blob2"></div>
+
+  <nav>
+    <img src="C:/MAMP/htdocs/WEB_2026/logo.jpg" alt="Logo SmartCampus" class="nav-logo-img">
+    <span class="nav-brand">SmartCampus</span>
+    <div class="nav-links">
+      <a href="#" class="active">Menu</a>
+      <a href="C:/MAMP/htdocs/WEB_2026/dashboard_admin.html">Tableau de bord</a>
+      <a href="#">Profil</a>
+      <div class="nav-bell" title="Notifications">🔔</div>
+    </div>
+  </nav>
+
+  <main class="page-wrapper">
+    
+    <div class="menu-header">
+      <h1>Menu</h1>
+    </div>
+
+    <div class="menu-grid">
+      
+      <a href="C:/MAMP/htdocs/WEB_2026/dashboard_admin.html" class="menu-card">
+        <div class="menu-icon">📊</div>
+        <div class="menu-title">Tableau de bord</div>
+      </a>
+
+      <a href="#" class="menu-card">
+        <div class="menu-icon">💬</div>
+        <div class="menu-title">Messagerie</div>
+      </a>
+
+      <a href="#" class="menu-card">
+        <div class="menu-icon">🎓</div>
+        <div class="menu-title">Gestion étudiants</div>
+      </a>
+
+      <a href="#" class="menu-card">
+        <div class="menu-icon">👨‍🏫</div>
+        <div class="menu-title">Gestion enseignant</div>
+      </a>
+
+      <a href="#" class="menu-card">
+        <div class="menu-icon">📅</div>
+        <div class="menu-title">Gestion emploi du temps</div>
+      </a>
+
+      <a href="#" class="menu-card">
+        <div class="menu-icon">📚</div>
+        <div class="menu-title">Gestion des Cours et Affectations</div>
+      </a>
+
+    </div>
+
+  </main>
+
+  <footer>© 2026 SmartCampus — Tous droits réservés</footer>
+
+</body>
+</html>
