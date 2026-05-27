@@ -1,5 +1,3 @@
-//basiquement un tableau des étudiants ou on peut rechercher consulter modifier et supprimer ses données
-//peut fonctionner avec des filtres, par exemple les promos, les classes 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -84,8 +82,11 @@
       box-shadow: 0 8px 32px rgba(0,0,0,.06); padding: 1.5rem 2rem;
     }
 
-    /* ── EN-TÊTE & ACTIONS ── */
+    /* ── EN-TÊTE & ZONE FILTRES AVANCÉS ── */
     .top-actions {
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+    .header-row {
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
     }
     .page-title {
@@ -93,12 +94,14 @@
       background: rgba(255,255,255,0.55); padding: 10px 20px; border-radius: 12px;
       border: 1px solid rgba(255,255,255,0.8); backdrop-filter: blur(10px);
     }
-
-    .action-controls { display: flex; gap: 1rem; align-items: center; flex: 1; justify-content: flex-end; }
     
+    /* Barre de recherche et filtres */
+    .filters-wrapper {
+      display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; width: 100%;
+    }
     .search-bar {
       display: flex; align-items: center; background: rgba(255,255,255,0.8);
-      border: 1.5px solid #cce0e0; border-radius: 10px; padding: 0 14px; width: 300px;
+      border: 1.5px solid #cce0e0; border-radius: 10px; padding: 0 14px; flex: 1; min-width: 250px;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .search-bar:focus-within {
@@ -110,11 +113,19 @@
     }
     .search-icon { font-size: 1.2rem; color: var(--teal); }
 
+    /* Menus déroulants de filtrage */
+    .filter-select {
+      background: rgba(255,255,255,0.8); border: 1.5px solid #cce0e0; border-radius: 10px;
+      padding: 12px 20px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--navy);
+      outline: none; cursor: pointer; min-width: 160px; transition: border-color 0.2s;
+    }
+    .filter-select:focus { border-color: var(--teal); }
+
     .btn-add {
       background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff;
       border: none; border-radius: 10px; padding: 12px 24px; font-family: 'Syne', sans-serif;
       font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;
-      box-shadow: 0 6px 20px rgba(0,0,0,.08); transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 6px 20px rgba(0,0,0,.08); transition: transform .2s, box-shadow .2s; margin-left: auto;
     }
     .btn-add:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(10,147,150,.3); }
 
@@ -131,10 +142,11 @@
     }
     tr:hover td { background: rgba(255,255,255,0.4); cursor: pointer; }
     
-    .action-links a {
-      color: var(--teal); font-weight: 600; text-decoration: none; margin-right: 10px; font-size: 0.85rem;
+    .action-links button {
+      background: none; border: none; color: var(--teal); font-weight: 600; font-family: 'DM Sans', sans-serif;
+      cursor: pointer; margin-right: 12px; font-size: 0.85rem;
     }
-    .action-links a:hover { text-decoration: underline; }
+    .action-links button:hover { text-decoration: underline; }
 
     /* ── FICHE DÉTAILS ÉTUDIANT ── */
     .details-grid {
@@ -158,13 +170,12 @@
     }
     .btn-edit:hover { background: var(--teal); color: var(--white); }
 
-    /* Graphique Radar (SVG) & Moyenne */
+    /* Graphique Radar & Moyenne */
     .stats-box { text-align: center; margin-bottom: 1rem; }
     .stats-box .moyenne {
       font-size: 2.5rem; font-weight: 800; color: var(--teal); font-family: 'Syne', sans-serif; line-height: 1;
     }
     .stats-box span { font-size: 0.9rem; font-weight: 600; color: #4a6a6a; text-transform: uppercase; }
-    
     .radar-chart { width: 150px; height: 150px; margin: 15px 0; }
 
     /* Zone de Danger */
@@ -179,12 +190,46 @@
     }
     .btn-danger:hover { background: var(--alert-hover); transform: translateY(-2px); }
 
+    /* ── STYLE DE LA FENÊTRE MODALE D'ÉDITION ÉTUDIANT ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(13,27,42,.45); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; z-index: 200;
+      opacity: 0; pointer-events: none; transition: opacity .3s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--white); border-radius: 20px; width: 550px; max-width: 94vw;
+      padding: 2rem; box-shadow: 0 28px 80px rgba(0,0,0,.18); position: relative;
+      max-height: 85vh; overflow-y: auto;
+    }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--navy); margin-bottom: 1.5rem; }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .full-width { grid-column: span 2; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; color: #3d5a5a; letter-spacing: 0.05em; }
+    .form-group input {
+      padding: 10px 14px; border: 1.5px solid #cce0e0; border-radius: 10px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.93rem; color: var(--navy); outline: none; background: #f0fafa;
+    }
+    .form-group input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(10,147,150,.12); }
+    
+    .modal-btns { display: flex; gap: 1rem; margin-top: 2rem; }
+    .btn-save {
+      flex: 1; padding: 12px; background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff;
+      border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer;
+    }
+    .btn-cancel {
+      padding: 12px 24px; background: #e0f0ef; color: var(--navy); border: none; border-radius: 12px;
+      font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer;
+    }
+    .btn-close { position: absolute; top: 16px; right: 18px; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #6b8080; }
+
     @media (max-width: 900px) {
       .details-grid { grid-template-columns: 1fr; }
       .details-right { border-left: none; border-top: 2px solid rgba(13, 27, 42, 0.08); padding-left: 0; padding-top: 2rem; }
-      .top-actions { flex-direction: column; align-items: flex-start; }
-      .action-controls { width: 100%; flex-wrap: wrap; }
-      .search-bar { width: 100%; }
+      .form-grid { grid-template-columns: 1fr; }
+      .full-width { grid-column: span 1; }
     }
 
     /* ── FOOTER ── */
@@ -204,24 +249,40 @@
     <img src="C:/MAMP/htdocs/WEB_2026/logo.jpg" alt="Logo" class="nav-logo-img">
     <span class="nav-brand">SmartCampus</span>
     <div class="nav-links">
-      <a href="menu.html">Menu</a>
+      <a href="C:/MAMP/htdocs/WEB_2026/menu_admin.html">Menu</a>
       <a href="C:/MAMP/htdocs/WEB_2026/dashboard_admin.html">Tableau de bord</a>
-      <a href="messagerie_admin.html">Messagerie</a>
-      <a href="#" class="active">Gestion étudiants</a>
+      
+      <a href="#" class="active">Profil : Administrateur</a>
     </div>
   </nav>
 
   <main class="page-wrapper">
     
     <div class="top-actions">
-      <div class="page-title">Gestion étudiants</div>
+      <div class="header-row">
+        <div class="page-title">Gestion étudiants</div>
+        <button class="btn-add"><a href="C:/MAMP/htdocs/WEB_2026/ajout_etudiant.html">👤+ Ajout étudiant </a></button>
+      </div>
       
-      <div class="action-controls">
+      <div class="filters-wrapper">
         <div class="search-bar">
           <span class="search-icon">🔍</span>
-          <input type="search" placeholder="Rechercher étudiant..." id="searchInput">
+          <input type="search" placeholder="Rechercher par nom, prénom ou email..." id="searchInput">
         </div>
-        <button class="btn-add">👤+ Ajouter étudiant</button>
+        
+        <select class="filter-select" id="promoFilter">
+          <option value="">Toutes les promos</option>
+          <option value="2026">Promo 2026</option>
+          <option value="2025">Promo 2025</option>
+          <option value="2024">Promo 2024</option>
+        </select>
+        
+        <select class="filter-select" id="classFilter">
+          <option value="">Toutes les classes</option>
+          <option value="Informatique">Informatique</option>
+          <option value="Web Design">Web Design</option>
+          <option value="Marketing">Marketing</option>
+        </select>
       </div>
     </div>
 
@@ -231,40 +292,40 @@
           <tr>
             <th>Nom Prénom</th>
             <th>Email</th>
-            <th>Parcours</th>
+            <th>Parcours / Classe</th>
             <th>Moyenne</th>
             <th>Actions (CRUD)</th>
           </tr>
         </thead>
         <tbody>
-          <tr onclick="updateDetails('Jean Dupont', 'jean.dupont@smartcampus.fr', 'Master Informatique', '14.5')">
+          <tr onclick="updateDetails('Jean Dupont', 'jean.dupont@smartcampus.fr', 'Master Informatique', '14.5', '06 12 34 56 78', '12/04/2003', 'Lycée Montaigne', 'Licence Informatique')">
             <td>Jean Dupont</td>
             <td>jean.dupont@smartcampus.fr</td>
             <td>Master Informatique</td>
             <td><strong>14.5</strong></td>
             <td class="action-links">
-              <a href="#">Éditer</a>
-              <a href="#" style="color: var(--alert);" onclick="confirmDelete(event, 'Jean Dupont')">Supprimer</a>
+              <button onclick="openEditModal(event)">Éditer tout</button>
+              <button style="color: var(--alert);" onclick="confirmDelete(event, 'Jean Dupont')">Supprimer</button>
             </td>
           </tr>
-          <tr onclick="updateDetails('Sophie Martin', 'sophie.m@smartcampus.fr', 'Licence Web Design', '16.2')">
+          <tr onclick="updateDetails('Sophie Martin', 'sophie.m@smartcampus.fr', 'Licence Web Design', '16.2', '07 89 45 61 23', '24/09/2004', 'Lycée Condorcet', 'BAC STI2D')">
             <td>Sophie Martin</td>
             <td>sophie.m@smartcampus.fr</td>
             <td>Licence Web Design</td>
             <td><strong>16.2</strong></td>
             <td class="action-links">
-              <a href="#">Éditer</a>
-              <a href="#" style="color: var(--alert);" onclick="confirmDelete(event, 'Sophie Martin')">Supprimer</a>
+              <button onclick="openEditModal(event)">Éditer tout</button>
+              <button style="color: var(--alert);" onclick="confirmDelete(event, 'Sophie Martin')">Supprimer</button>
             </td>
           </tr>
-          <tr onclick="updateDetails('Lucas Bernard', 'lucas.b@smartcampus.fr', 'Bachelor Marketing', '12.8')">
+          <tr onclick="updateDetails('Lucas Bernard', 'lucas.b@smartcampus.fr', 'Bachelor Marketing', '12.8', '06 55 44 33 22', '05/11/2002', 'Lycée Daguin', 'BTS Communication')">
             <td>Lucas Bernard</td>
             <td>lucas.b@smartcampus.fr</td>
             <td>Bachelor Marketing</td>
             <td><strong>12.8</strong></td>
             <td class="action-links">
-              <a href="#">Éditer</a>
-              <a href="#" style="color: var(--alert);" onclick="confirmDelete(event, 'Lucas Bernard')">Supprimer</a>
+              <button onclick="openEditModal(event)">Éditer tout</button>
+              <button style="color: var(--alert);" onclick="confirmDelete(event, 'Lucas Bernard')">Supprimer</button>
             </td>
           </tr>
         </tbody>
@@ -280,24 +341,24 @@
             <h3 id="det-nom">Jean Dupont</h3>
             <p id="det-email">jean.dupont@smartcampus.fr</p>
           </div>
-          <button class="btn-edit">Modifier infos</button>
+          <button class="btn-edit" onclick="openEditModal(null)">Modifier infos</button>
         </div>
 
         <div class="info-block" style="border-top: 1px solid rgba(13,27,42,0.1); padding-top: 1rem;">
           <div class="info-content">
             <p><strong>Ses infos :</strong></p>
-            <p>Date de naissance : 12/04/2003<br>Téléphone : 06 12 34 56 78</p>
+            <p>Date de naissance : <span id="det-naissance">12/04/2003</span><br>Téléphone : <span id="det-tel">06 12 34 56 78</span></p>
           </div>
-          <button class="btn-edit">Modifier infos</button>
+          <button class="btn-edit" onclick="openEditModal(null)">Modifier infos</button>
         </div>
 
         <div class="info-block" style="border-top: 1px solid rgba(13,27,42,0.1); padding-top: 1rem;">
           <div class="info-content">
             <p><strong>Parcours académique :</strong></p>
-            <p id="det-parcours">Master Informatique (En cours)</p>
-            <p style="font-size: 0.85rem; color: #6b8080;">Ancienne école : Lycée Montaigne<br>Dernier diplôme : Licence Informatique</p>
+            <p id="det-parcours">Master Informatique</p>
+            <p style="font-size: 0.85rem; color: #6b8080;">Ancienne école : <span id="det-ecole">Lycée Montaigne</span><br>Dernier diplôme : <span id="det-diplome">Licence Informatique</span></p>
           </div>
-          <button class="btn-edit">Modifier ancienne école & diplôme</button>
+          <button class="btn-edit" onclick="openEditModal(null)">modifier infos complètes</button>
         </div>
 
       </div>
@@ -324,39 +385,131 @@
           <button class="btn-danger" onclick="confirmDelete(null, document.getElementById('det-nom').innerText)">
             🗑️ Supprimer étudiant
           </button>
-          <p style="font-size: 0.75rem; color: #6b8080; margin-top: 8px;">Action avec sécurité (Confirmation requise)</p>
         </div>
 
       </div>
     </div>
-
   </main>
+
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+      <button class="btn-close" onclick="closeEditModal()">✕</button>
+      <div class="modal-title">Éditer le profil étudiant</div>
+      
+      <form id="editStudentForm" class="form-grid" onsubmit="saveStudentChanges(event)">
+        <div class="form-group">
+          <label>Prénom &amp; Nom</label>
+          <input type="text" id="input-nom" required>
+        </div>
+        <div class="form-group">
+          <label>Adresse E-mail</label>
+          <input type="email" id="input-email" required>
+        </div>
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input type="text" id="input-tel">
+        </div>
+        <div class="form-group">
+          <label>Date de naissance</label>
+          <input type="text" id="input-naissance">
+        </div>
+        <div class="form-group">
+          <label>Classe / Filière académique</label>
+          <input type="text" id="input-parcours" required>
+        </div>
+        <div class="form-group">
+          <label>Moyenne Générale</label>
+          <input type="text" id="input-moyenne" required>
+        </div>
+        <div class="form-group full-width">
+          <label>Ancienne École</label>
+          <input type="text" id="input-ecole">
+        </div>
+        <div class="form-group full-width">
+          <label>Dernier Diplôme obtenu</label>
+          <input type="text" id="input-diplome">
+        </div>
+        
+        <div class="modal-btns full-width">
+          <button type="button" class="btn-cancel" onclick="closeEditModal()">Annuler</button>
+          <button type="submit" class="btn-save">Enregistrer les modifications</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <footer>© 2026 SmartCampus — Tous droits réservés</footer>
 
   <script>
-    // 1. Bouton Supprimer avec sécurité
-    function confirmDelete(event, studentName) {
-      if(event) event.stopPropagation(); // Empêche de déclencher le clic sur la ligne entière
-      const confirmation = confirm("⚠️ ATTENTION :\nÊtes-vous sûr de vouloir supprimer définitivement l'étudiant(e) " + studentName + " ?\nCette action est irréversible.");
-      
-      if(confirmation) {
-        alert("L'étudiant(e) " + studentName + " a été supprimé(e) du système.");
-        // Ici viendra le code pour supprimer de la base de données
-      }
-    }
+    // Variables de stockage temporaire de l'étudiant pointé
+    let currentStudentData = {};
 
-    // 2. Mettre à jour la fiche détaillée au clic sur une ligne du tableau
-    function updateDetails(nom, email, parcours, moyenne) {
+    // 1. Mettre à jour la fiche en bas au clic sur le tableau
+    function updateDetails(nom, email, parcours, moyenne, tel, naissance, ecole, diplome) {
+      currentStudentData = { nom, email, parcours, moyenne, tel, naissance, ecole, diplome };
+
       document.getElementById('det-nom').innerText = nom;
       document.getElementById('det-email').innerText = email;
-      document.getElementById('det-parcours').innerText = parcours + " (En cours)";
+      document.getElementById('det-parcours').innerText = parcours;
       document.getElementById('det-moyenne').innerText = moyenne;
+      document.getElementById('det-tel').innerText = tel;
+      document.getElementById('det-naissance').innerText = naissance;
+      document.getElementById('det-ecole').innerText = ecole;
+      document.getElementById('det-diplome').innerText = diplome;
       
-      // Petit effet visuel pour montrer que la fiche s'est actualisée
-      const detailsCard = document.getElementById('studentDetails');
-      detailsCard.style.opacity = '0.5';
-      setTimeout(() => { detailsCard.style.opacity = '1'; }, 150);
+      const card = document.getElementById('studentDetails');
+      card.style.opacity = '0.5';
+      setTimeout(() => card.style.opacity = '1', 100);
+    }
+
+    // 2. Ouvrir la modale d'édition avec toutes les valeurs chargées
+    function openEditModal(event) {
+      if(event) event.stopPropagation(); // Évite de re-sélectionner la ligne
+      
+      // Injecte les données actuelles dans les inputs de la modale
+      document.getElementById('input-nom').value = document.getElementById('det-nom').innerText;
+      document.getElementById('input-email').value = document.getElementById('det-email').innerText;
+      document.getElementById('input-tel').value = document.getElementById('det-tel').innerText;
+      document.getElementById('input-naissance').value = document.getElementById('det-naissance').innerText;
+      document.getElementById('input-parcours').value = document.getElementById('det-parcours').innerText;
+      document.getElementById('input-moyenne').value = document.getElementById('det-moyenne').innerText;
+      document.getElementById('input-ecole').value = document.getElementById('det-ecole').innerText;
+      document.getElementById('input-diplome').value = document.getElementById('det-diplome').innerText;
+
+      document.getElementById('editModal').classList.add('open');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('open');
+    }
+
+    // 3. Sauvegarder les modifications saisies dans la modale
+    function saveStudentChanges(event) {
+      event.preventDefault();
+      
+      const nom = document.getElementById('input-nom').value;
+      const email = document.getElementById('input-email').value;
+      const parcours = document.getElementById('input-parcours').value;
+      const moyenne = document.getElementById('input-moyenne').value;
+      const tel = document.getElementById('input-tel').value;
+      const naissance = document.getElementById('input-naissance').value;
+      const ecole = document.getElementById('input-ecole').value;
+      const diplome = document.getElementById('input-diplome').value;
+      
+      // Met à jour l'affichage de la fiche en direct
+      updateDetails(nom, email, parcours, moyenne, tel, naissance, ecole, diplome);
+      
+      alert("Modifications enregistrées avec succès pour l'étudiant " + nom + " !");
+      closeEditModal();
+    }
+
+    // 4. Supprimer un étudiant avec sécurité
+    function confirmDelete(event, studentName) {
+      if(event) event.stopPropagation();
+      const confirmation = confirm("⚠️ ATTENTION :\nÊtes-vous sûr de vouloir supprimer définitivement l'étudiant(e) " + studentName + " ?");
+      if(confirmation) {
+        alert("L'étudiant(e) " + studentName + " a été retiré(e) du système.");
+      }
     }
   </script>
 
