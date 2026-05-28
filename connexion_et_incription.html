@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SmartCampus</title>
+  <title>SmartCampus - Accueil</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,7 +15,7 @@
       --teal: #0a9396;
       --teal-light: #94d2bd;
       --white: #f8fffe;
-      --gray: #e0f0ef;
+      --alert: #e63946;
     }
 
     html, body {
@@ -34,377 +34,248 @@
       height: 52px;
       z-index: 100;
     }
-    .nav-logo {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      color: var(--teal-light);
-      text-transform: uppercase;
-      border: 1.5px solid var(--teal-light);
-      padding: 4px 10px;
-      border-radius: 4px;
-      margin-right: 12px;
-    }
-    .nav-brand {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--white);
-      letter-spacing: 0.04em;
-    }
-    .nav-links {
-      margin-left: auto;
-      display: flex; gap: 6px;
-    }
+    .nav-logo-img { height: 32px; margin-right: 12px; border-radius: 4px; object-fit: contain; }
+    .nav-brand { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--white); letter-spacing: 0.04em; }
+    .nav-links { margin-left: auto; display: flex; gap: 6px; }
     .nav-links a {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 500;
-      color: var(--sky);
-      text-decoration: none;
-      padding: 6px 14px;
-      border-radius: 4px;
-      transition: background .2s, color .2s;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--sky);
+      text-decoration: none; padding: 6px 14px; border-radius: 4px; transition: background .2s, color .2s;
+      letter-spacing: 0.04em; text-transform: uppercase;
     }
-    .nav-links a:hover { background: var(--teal); color: #fff; }
-    .nav-links a.active {
-      background: var(--teal);
-      color: #fff;
-    }
+    .nav-links a:hover, .nav-links a.active { background: var(--teal); color: #fff; }
 
     /* ── HERO BG DECORATION ── */
-    .bg-blob {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.35;
-      pointer-events: none;
-      z-index: 0;
-    }
+    .bg-blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.35; pointer-events: none; z-index: 0; }
     .blob1 { width: 480px; height: 480px; background: var(--teal); top: -100px; left: -80px; }
     .blob2 { width: 360px; height: 360px; background: #00b4d8; bottom: 60px; right: -60px; }
 
     /* ── PAGE LAYOUT ── */
     .page {
-      position: relative;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 52px;
-      z-index: 1;
+      position: relative; height: 100vh; display: flex; flex-direction: column; align-items: center; padding-top: 52px; z-index: 1;
     }
 
-    /* ── WELCOME BANNER ── */
     .welcome-banner {
-      margin-top: 3.5rem;
-      background: rgba(255,255,255,0.55);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.7);
-      border-radius: 12px;
-      padding: 14px 52px;
-      font-family: 'Syne', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--navy);
-      letter-spacing: 0.04em;
-      text-align: center;
-      animation: fadeDown .6s ease both;
+      margin-top: 3.5rem; background: rgba(255,255,255,0.55); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 12px; padding: 14px 52px; font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--navy);
+      letter-spacing: 0.04em; text-align: center; animation: fadeDown .6s ease both;
     }
 
-    /* ── CARDS ── */
-    .cards {
-      display: flex;
-      gap: 3.5rem;
-      margin-top: 4rem;
-      animation: fadeUp .7s .15s ease both;
-    }
+    .cards { display: flex; gap: 3.5rem; margin-top: 4rem; animation: fadeUp .7s .15s ease both; }
 
     .card {
-      width: 220px;
-      aspect-ratio: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 18px;
-      background: rgba(255,255,255,0.55);
-      backdrop-filter: blur(14px);
-      border: 1.5px solid rgba(255,255,255,0.8);
-      border-radius: 20px;
-      cursor: pointer;
-      text-decoration: none;
-      color: var(--navy);
-      transition: transform .25s, box-shadow .25s, background .25s;
-      box-shadow: 0 6px 28px rgba(0,0,0,.06);
-      position: relative;
-      overflow: hidden;
+      width: 220px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+      background: rgba(255,255,255,0.55); backdrop-filter: blur(14px); border: 1.5px solid rgba(255,255,255,0.8); border-radius: 20px;
+      cursor: pointer; text-decoration: none; color: var(--navy); transition: transform .25s, box-shadow .25s;
+      box-shadow: 0 6px 28px rgba(0,0,0,.06); position: relative; overflow: hidden;
     }
     .card::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, var(--teal) 0%, #00b4d8 100%);
-      opacity: 0;
-      transition: opacity .3s;
-      border-radius: 18px;
+      content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--teal) 0%, #00b4d8 100%);
+      opacity: 0; transition: opacity .3s; border-radius: 18px;
     }
-    .card:hover {
-      transform: translateY(-8px) scale(1.03);
-      box-shadow: 0 18px 48px rgba(10,147,150,.22);
-    }
+    .card:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 18px 48px rgba(10,147,150,.22); }
     .card:hover::before { opacity: 1; }
-    .card:hover .card-icon,
-    .card:hover .card-label { color: #fff; }
+    .card:hover .card-icon, .card:hover .card-label { color: #fff; }
+    .card-icon { font-size: 2.6rem; position: relative; z-index: 1; transition: color .3s; }
+    .card-label { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.04em; position: relative; z-index: 1; transition: color .3s; text-align: center; }
 
-    .card-icon {
-      font-size: 2.6rem;
-      position: relative; z-index: 1;
-      transition: color .3s;
+    /* ── BOUTON ADMIN ── */
+    .btn-admin {
+      margin-top: 3.5rem; padding: 14px 28px; background: linear-gradient(135deg, #1d3557, #457b9d); color: #fff;
+      border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+      letter-spacing: 0.04em; text-decoration: none; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.15);
+      transition: transform .2s, box-shadow .2s; animation: fadeUp .7s .3s ease both;
     }
-    .card-label {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      position: relative; z-index: 1;
-      transition: color .3s;
-    }
+    .btn-admin:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(29, 53, 87, 0.4); }
 
     /* ── MODAL ── */
     .overlay {
-      position: fixed; inset: 0;
-      background: rgba(13,27,42,.45);
-      backdrop-filter: blur(4px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 200;
-      opacity: 0; pointer-events: none;
-      transition: opacity .3s;
+      position: fixed; inset: 0; background: rgba(13,27,42,.45); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
+      z-index: 200; opacity: 0; pointer-events: none; transition: opacity .3s;
     }
     .overlay.open { opacity: 1; pointer-events: all; }
-
     .modal {
-      background: var(--white);
-      border-radius: 20px;
-      width: 380px;
-      max-width: 94vw;
-      padding: 2.4rem 2.2rem 2rem;
-      box-shadow: 0 28px 80px rgba(0,0,0,.18);
-      transform: translateY(24px);
-      transition: transform .35s ease;
-      position: relative;
+      background: var(--white); border-radius: 20px; width: 400px; max-width: 94vw; padding: 2.4rem 2.2rem 2rem;
+      box-shadow: 0 28px 80px rgba(0,0,0,.18); transform: translateY(24px); transition: transform .35s ease; position: relative; max-height: 90vh; overflow-y: auto;
     }
     .overlay.open .modal { transform: translateY(0); }
 
-    .modal-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--navy);
-      margin-bottom: 0.3rem;
-    }
-    .modal-sub {
-      font-size: 0.84rem;
-      color: #6b8080;
-      margin-bottom: 1.6rem;
-    }
-
-    label {
-      display: block;
-      font-size: 0.78rem;
-      font-weight: 500;
-      color: #3d5a5a;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 5px;
-      margin-top: 1rem;
-    }
-    label:first-of-type { margin-top: 0; }
-
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--navy); margin-bottom: 0.3rem; }
+    .modal-sub { font-size: 0.84rem; color: #6b8080; margin-bottom: 1.6rem; }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+    
+    label { display: block; font-size: 0.78rem; font-weight: 600; color: #3d5a5a; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
     input {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1.5px solid #cce0e0;
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.93rem;
-      color: var(--navy);
-      outline: none;
-      background: #f0fafa;
-      transition: border-color .2s, box-shadow .2s;
+      width: 100%; padding: 10px 14px; border: 1.5px solid #cce0e0; border-radius: 10px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.93rem; color: var(--navy); outline: none; background: #f0fafa; transition: border-color .2s;
     }
-    input:focus {
-      border-color: var(--teal);
-      box-shadow: 0 0 0 3px rgba(10,147,150,.12);
-    }
+    input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(10,147,150,.12); background: #fff; }
 
     .btn-submit {
-      margin-top: 1.6rem;
-      width: 100%;
-      padding: 12px;
-      background: linear-gradient(135deg, var(--teal), #00b4d8);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      transition: transform .2s, box-shadow .2s;
+      margin-top: 1rem; width: 100%; padding: 12px; background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff;
+      border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform .2s;
     }
-    .btn-submit:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(10,147,150,.32);
-    }
-    .btn-submit:active { transform: translateY(0); }
+    .btn-submit.admin-btn { background: linear-gradient(135deg, #1d3557, #457b9d); }
+    .btn-submit:hover { transform: translateY(-2px); }
 
-    .modal-footer {
-      margin-top: 1rem;
-      text-align: center;
-      font-size: 0.83rem;
-      color: #6b8080;
-    }
-    .modal-footer a {
-      color: var(--teal);
-      font-weight: 600;
-      text-decoration: none;
-      cursor: pointer;
-    }
+    .modal-footer { margin-top: 1rem; text-align: center; font-size: 0.83rem; color: #6b8080; }
+    .modal-footer a { color: var(--teal); font-weight: 600; text-decoration: none; cursor: pointer; }
     .modal-footer a:hover { text-decoration: underline; }
+    .btn-close { position: absolute; top: 16px; right: 18px; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #6b8080; }
 
-    .btn-close {
-      position: absolute; top: 16px; right: 18px;
-      background: none; border: none;
-      font-size: 1.3rem; cursor: pointer;
-      color: #6b8080;
-      line-height: 1;
-      transition: color .2s;
-    }
-    .btn-close:hover { color: var(--navy); }
-
-    /* ── FOOTER ── */
     footer {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      height: 42px;
-      background: var(--navy);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.78rem;
-      color: var(--teal-light);
-      letter-spacing: 0.08em;
-      z-index: 100;
+      position: fixed; bottom: 0; left: 0; right: 0; height: 42px; background: var(--navy); display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--teal-light); letter-spacing: 0.08em; z-index: 100;
     }
 
-    /* ── ANIMATIONS ── */
-    @keyframes fadeDown {
-      from { opacity:0; transform:translateY(-18px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
-    @keyframes fadeUp {
-      from { opacity:0; transform:translateY(24px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-18px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
   </style>
 </head>
 <body>
 
-  <!-- NAVBAR -->
   <nav>
-    <span class="nav-logo">Logo</span>
+    <img src="C:/MAMP/htdocs/WEB_2026/logo.jpg" alt="Logo SmartCampus" class="nav-logo-img">
     <span class="nav-brand">SmartCampus</span>
     <div class="nav-links">
-      <a href="#">Menu</a>
       <a href="#" class="active">Accueil</a>
-      <a href="#">Profil / Connexion</a>
     </div>
   </nav>
 
-  <!-- BG DECORATIONS -->
   <div class="bg-blob blob1"></div>
   <div class="bg-blob blob2"></div>
 
-  <!-- MAIN PAGE -->
   <div class="page">
-    <div class="welcome-banner">Bienvenue sur SmartCampus</div>
+    <div class="welcome-banner">Bienvenue sur le portail SmartCampus</div>
 
     <div class="cards">
-      <!-- CONNEXION -->
-      <a class="card" onclick="openModal('login')">
-        <div class="card-icon">🔑</div>
-        <span class="card-label">Connexion</span>
+      <a class="card" onclick="openModal('loginModal')">
+        <div class="card-icon">🎓</div>
+        <span class="card-label">Espace<br>Étudiant / Enseignant</span>
       </a>
-      <!-- INSCRIPTION -->
-      <a class="card" onclick="openModal('register')">
+      
+      <a class="card" onclick="openModal('registerModal')">
         <div class="card-icon">📝</div>
-        <span class="card-label">Inscription</span>
+        <span class="card-label">Nouvel Élève ?<br>S'inscrire</span>
       </a>
     </div>
+    
+    <button class="btn-admin" onclick="openModal('adminModal')">
+      🔒 Accès Administrateur
+    </button>
   </div>
 
-  <!-- MODAL CONNEXION -->
   <div class="overlay" id="loginModal">
     <div class="modal">
       <button class="btn-close" onclick="closeModal('loginModal')">✕</button>
       <div class="modal-title">Connexion</div>
-      <div class="modal-sub">Accédez à votre espace SmartCampus</div>
-      <label>Adresse e-mail</label>
-      <input type="email" placeholder="vous@exemple.fr"/>
-      <label>Mot de passe</label>
-      <input type="password" placeholder="••••••••"/>
-      <button class="btn-submit">Se connecter</button>
+      <div class="modal-sub">Identifiez-vous pour accéder à vos cours</div>
+      
+      <form action="traitement_login.php" method="POST">
+        <div class="form-group">
+          <label>Adresse e-mail institutionnelle</label>
+          <input type="email" name="email" placeholder="prenom.nom@smartcampus.fr" required />
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" name="password" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-submit">Se connecter</button>
+      </form>
+      
       <div class="modal-footer">
-        Pas encore de compte ? <a onclick="switchModal('loginModal','registerModal')">S'inscrire</a>
+        Étudiant non inscrit ? <a onclick="switchModal('loginModal','registerModal')">Créer un compte</a>
       </div>
     </div>
   </div>
 
-  <!-- MODAL INSCRIPTION -->
   <div class="overlay" id="registerModal">
     <div class="modal">
       <button class="btn-close" onclick="closeModal('registerModal')">✕</button>
-      <div class="modal-title">Inscription</div>
-      <div class="modal-sub">Créez votre compte SmartCampus</div>
-      <label>Prénom &amp; Nom</label>
-      <input type="text" placeholder="Jean Dupont"/>
-      <label>Adresse e-mail</label>
-      <input type="email" placeholder="vous@exemple.fr"/>
-      <label>Mot de passe</label>
-      <input type="password" placeholder="••••••••"/>
-      <label>Confirmer le mot de passe</label>
-      <input type="password" placeholder="••••••••"/>
-      <button class="btn-submit">Créer mon compte</button>
+      <div class="modal-title">Inscription Étudiant</div>
+      <div class="modal-sub">Créez votre dossier académique</div>
+      
+      <form action="traitement_inscription.php" method="POST">
+        <div class="form-row">
+          <div>
+            <label>Prénom</label>
+            <input type="text" name="prenom" placeholder="Jean" required />
+          </div>
+          <div>
+            <label>Nom</label>
+            <input type="text" name="nom" placeholder="Dupont" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Adresse e-mail</label>
+          <input type="email" name="email" placeholder="jean.dupont@smartcampus.fr" required />
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" name="password" placeholder="••••••••" required />
+        </div>
+        <div class="form-group">
+          <label>Confirmer le mot de passe</label>
+          <input type="password" name="password_confirm" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-submit">Créer mon compte étudiant</button>
+      </form>
+      
       <div class="modal-footer">
         Déjà un compte ? <a onclick="switchModal('registerModal','loginModal')">Se connecter</a>
       </div>
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer>© 2025 SmartCampus — Tous droits réservés</footer>
+  <div class="overlay" id="adminModal">
+    <div class="modal" style="border-top: 6px solid #1d3557;">
+      <button class="btn-close" onclick="closeModal('adminModal')">✕</button>
+      <div class="modal-title" style="color: #1d3557;">Espace Admin</div>
+      <div class="modal-sub">Accès restreint au personnel autorisé</div>
+      
+      <form onsubmit="verifyAdmin(event)">
+        <div class="form-group">
+          <label>E-mail Administrateur</label>
+          <input type="email" id="adminEmail" placeholder="admin@smartcampus.fr" required />
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" id="adminPass" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-submit admin-btn">Déverrouiller le Dashboard</button>
+      </form>
+    </div>
+  </div>
+
+  <footer>© 2026 SmartCampus — Tous droits réservés</footer>
 
   <script>
-    function openModal(type) {
-      const id = type === 'login' ? 'loginModal' : 'registerModal';
-      document.getElementById(id).classList.add('open');
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('open');
-    }
-    function switchModal(from, to) {
-      closeModal(from);
-      setTimeout(() => document.getElementById(to).classList.add('open'), 200);
-    }
-    // Close on overlay click
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function switchModal(from, to) { closeModal(from); setTimeout(() => openModal(to), 200); }
+    
     document.querySelectorAll('.overlay').forEach(o => {
       o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
     });
-    // Close on Escape
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
     });
+
+    // Fonction de vérification temporaire de l'admin (En attendant le PHP)
+    function verifyAdmin(event) {
+      event.preventDefault(); // Empêche le rechargement de la page
+      
+      const email = document.getElementById('adminEmail').value;
+      const pass = document.getElementById('adminPass').value;
+
+      // Vérification stricte basée sur ton INSERT INTO
+      if (email === 'pedropascal@gmail.com' && pass === 'pedro') {
+        window.location.href = 'C:/MAMP/htdocs/WEB_2026/dashboard_admin.html';
+      } else {
+        alert('Erreur : Identifiants administrateur incorrects ou accès refusé.');
+      }
+    }
   </script>
 </body>
 </html>
