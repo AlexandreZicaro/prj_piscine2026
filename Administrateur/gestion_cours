@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestion des Cours - SmartCampus</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  
+  <style>
+    /* ── RESET ET VARIABLES ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sky: #b8f0f0;
+      --navy: #0d1b2a;
+      --teal: #0a9396;
+      --teal-light: #94d2bd;
+      --white: #f8fffe;
+      --alert: #e63946;
+      --alert-hover: #c1121f;
+      --success: #2a9d8f;
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--sky);
+      color: var(--navy);
+      overflow-x: hidden;
+    }
+
+    /* ── HERO BG DECORATION ── */
+    .bg-blob {
+      position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.35; pointer-events: none; z-index: 0;
+    }
+    .blob1 { width: 480px; height: 480px; background: var(--teal); top: -100px; left: -80px; }
+    .blob2 { width: 360px; height: 360px; background: #00b4d8; bottom: 60px; right: -60px; }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center;
+      background: var(--navy); padding: 0 2rem; height: 52px; z-index: 100;
+    }
+    .nav-logo-img { height: 32px; margin-right: 12px; border-radius: 4px; object-fit: contain; }
+    .nav-brand { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--white); letter-spacing: 0.04em; }
+    .nav-links { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+    .nav-links a {
+      font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--sky);
+      text-decoration: none; padding: 6px 14px; border-radius: 4px; transition: background .2s;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .nav-links a:hover, .nav-links a.active { background: var(--teal); color: #fff; }
+    .nav-bell { position: relative; font-size: 1.1rem; color: var(--sky); cursor: pointer; margin: 0 8px; }
+    .nav-bell::after { content: ''; position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--alert); border-radius: 50%; border: 2px solid var(--navy); }
+
+    /* ── LAYOUT PRINCIPAL ── */
+    .page-wrapper {
+      position: relative; z-index: 1; width: 100%; max-width: 1200px;
+      margin: 0 auto; padding: 6rem 1.5rem 5rem 1.5rem; display: flex; flex-direction: column; gap: 2rem;
+    }
+
+    /* GLASSMORPHISM PANELS */
+    .glass-panel {
+      background: rgba(255,255,255,0.65); backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.8); border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.06); padding: 1.5rem 2rem;
+    }
+
+    /* EN-TÊTE & FILTRES */
+    .top-actions { display: flex; flex-direction: column; gap: 1.5rem; }
+    .header-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .page-title {
+      font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--navy);
+      background: rgba(255,255,255,0.55); padding: 10px 20px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+    }
+    
+    .filters-wrapper { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; width: 100%; }
+    .search-bar {
+      display: flex; align-items: center; background: rgba(255,255,255,0.8);
+      border: 1.5px solid #cce0e0; border-radius: 10px; padding: 0 14px; flex: 1; min-width: 250px;
+    }
+    .search-bar input { border: none; background: transparent; outline: none; padding: 12px 10px; width: 100%; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--navy); }
+    .filter-select {
+      background: rgba(255,255,255,0.8); border: 1.5px solid #cce0e0; border-radius: 10px;
+      padding: 12px 20px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--navy); cursor: pointer; min-width: 160px;
+    }
+
+    .btn-add {
+      background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff;
+      border: none; border-radius: 10px; padding: 12px 24px; font-family: 'Syne', sans-serif;
+      font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; margin-left: auto;
+    }
+    .btn-add:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(10,147,150,.3); }
+
+    /* ── TABLEAU DES COURS ── */
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { font-family: 'Syne', sans-serif; font-weight: 700; padding: 15px 10px; border-bottom: 2px solid rgba(13, 27, 42, 0.2); }
+    td { padding: 15px 10px; border-bottom: 1px solid rgba(13, 27, 42, 0.08); font-size: 0.95rem; }
+    tr:hover td { background: rgba(255,255,255,0.4); cursor: pointer; }
+    .action-links button { background: none; border: none; color: var(--teal); font-weight: 600; cursor: pointer; margin-right: 12px; font-size: 0.85rem; font-family: 'DM Sans', sans-serif; }
+    .action-links button:hover { text-decoration: underline; }
+
+    /* ── ZONE DETAIL & AFFECTATION ── */
+    .details-grid { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 2rem; }
+    .details-left { display: flex; flex-direction: column; gap: 1.5rem; }
+    .details-right { border-left: 2px solid rgba(13, 27, 42, 0.08); padding-left: 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    
+    .info-block { display: flex; justify-content: space-between; align-items: flex-start; }
+    .info-content h3 { font-family: 'Syne', sans-serif; font-size: 1.4rem; color: var(--navy); margin-bottom: 6px; }
+    .info-content p { color: #4a6a6a; font-size: 0.95rem; line-height: 1.5; }
+    
+    .btn-edit {
+      background: transparent; border: 1.5px solid var(--teal); color: var(--teal);
+      padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700;
+      cursor: pointer; font-family: 'Syne', sans-serif; text-transform: uppercase;
+    }
+    .btn-edit:hover { background: var(--teal); color: var(--white); }
+
+    /* Styles spécifiques Affectations */
+    .assignment-box label { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--navy); display: block; margin-bottom: 8px; }
+    .assignment-select { width: 100%; padding: 10px; border: 1.5px solid #cce0e0; border-radius: 8px; font-family: 'DM Sans', sans-serif; background: #fff; color: var(--navy); outline: none; margin-bottom: 12px; }
+    .btn-assign { width: 100%; padding: 10px; background: var(--navy); color: #fff; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .btn-assign:hover { background: var(--teal); }
+
+    .danger-zone { border-top: 2px dashed rgba(230, 57, 70, 0.3); padding-top: 15px; margin-top: auto; }
+    .btn-danger { background: var(--alert); color: #fff; border: none; border-radius: 10px; padding: 12px 24px; font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.2s; }
+    .btn-danger:hover { background: var(--alert-hover); }
+
+    /* ── MODALE CRÉATION / ÉDITION ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(13,27,42,.45); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .3s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box { background: var(--white); border-radius: 20px; width: 520px; max-width: 94vw; padding: 2rem; box-shadow: 0 28px 80px rgba(0,0,0,.18); position: relative; }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 1.5rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .full-width { grid-column: span 2; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; color: #3d5a5a; }
+    .form-group input, .form-group select { padding: 10px 14px; border: 1.5px solid #cce0e0; border-radius: 10px; font-family: 'DM Sans', sans-serif; background: #f0fafa; outline: none; }
+    .modal-btns { display: flex; gap: 1rem; margin-top: 2rem; }
+    .btn-save { flex: 1; padding: 12px; background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; }
+    .btn-cancel { padding: 12px 24px; background: #e0f0ef; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; }
+    .btn-close { position: absolute; top: 16px; right: 18px; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #6b8080; }
+
+    @media (max-width: 900px) {
+      .details-grid { grid-template-columns: 1fr; }
+      .details-right { border-left: none; border-top: 2px solid rgba(13, 27, 42, 0.08); padding-left: 0; padding-top: 1.5rem; }
+    }
+
+    /* ── FOOTER ── */
+    footer { position: fixed; bottom: 0; left: 0; right: 0; height: 42px; background: var(--navy); display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--teal-light); letter-spacing: 0.08em; z-index: 100; }
+  </style>
+</head>
+<body>
+
+  <div class="bg-blob blob1"></div>
+  <div class="bg-blob blob2"></div>
+
+  <nav>
+    <img src="C:/MAMP/htdocs/WEB_2026/logo.jpg" alt="Logo" class="nav-logo-img">
+    <span class="nav-brand">SmartCampus</span>
+    <div class="nav-links">
+      <a href="C:/MAMP/htdocs/WEB_2026/menu_admin.html">Menu</a>
+      <a href="C:/MAMP/htdocs/WEB_2026/dashboard_admin.html">Tableau de bord</a>
+      <a href="#" class="active">Profil : Administrateur</a>
+    </div>
+  </nav>
+
+  <main class="page-wrapper">
+    
+    <div class="top-actions">
+      <div class="header-row">
+        <div class="page-title">Gestion des Cours &amp; Affectations</div>
+        <button class="btn-add" onclick="openCourseModal(false)">📚+ Créer un cours</button>
+      </div>
+      
+      <div class="filters-wrapper">
+        <div class="search-bar">
+          <input type="search" placeholder="Rechercher un cours par intitulé..." id="courseSearch">
+        </div>
+        <select class="filter-select" id="deptFilter">
+          <option value="">Tous les départements</option>
+          <option value="Informatique">Informatique</option>
+          <option value="Web Design">Web Design</option>
+          <option value="Marketing">Marketing</option>
+        </select>
+        <select class="filter-select" id="semestreFilter">
+          <option value="">Tous les semestres</option>
+          <option value="Semestre 1">Semestre 1</option>
+          <option value="Semestre 2">Semestre 2</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="glass-panel table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Intitulé du Cours</th>
+            <th>Département</th>
+            <th>Niveau / Semestre</th>
+            <th>Enseignant Affecté</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr onclick="selectCourse('Architecture Web', 'Informatique', 'Master 1 — Semestre 1', 'Dr. Julian Moreau', 'M1 Informatique')">
+            <td>Architecture Web</td>
+            <td>Informatique</td>
+            <td>Master 1 — Semestre 1</td>
+            <td><strong>Dr. Julian Moreau</strong></td>
+            <td class="action-links">
+              <button onclick="openCourseModal(true)">Modifier</button>
+              <button style="color: var(--alert);" onclick="confirmDeleteCourse(event, 'Architecture Web')">Supprimer</button>
+            </td>
+          </tr>
+          <tr onclick="selectCourse('UI/UX Design', 'Web Design', 'Licence 3 — Semestre 1', 'Mme. Claire Dubois', 'L3 Web Design')">
+            <td>UI/UX Design</td>
+            <td>Web Design</td>
+            <td>Licence 3 — Semestre 1</td>
+            <td><strong>Mme. Claire Dubois</strong></td>
+            <td class="action-links">
+              <button onclick="openCourseModal(true)">Modifier</button>
+              <button style="color: var(--alert);" onclick="confirmDeleteCourse(event, 'UI/UX Design')">Supprimer</button>
+            </td>
+          </tr>
+          <tr onclick="selectCourse('Algorithmique Avancée', 'Informatique', 'Master 1 — Semestre 2', 'Non affecté', 'M1 Informatique')">
+            <td>Algorithmique Avancée</td>
+            <td>Informatique</td>
+            <td>Master 1 — Semestre 2</td>
+            <td style="color: var(--alert);"><em>Non affecté</em></td>
+            <td class="action-links">
+              <button onclick="openCourseModal(true)">Modifier</button>
+              <button style="color: var(--alert);" onclick="confirmDeleteCourse(event, 'Algorithmique Avancée')">Supprimer</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="glass-panel details-grid" id="courseDetailsCard">
+      
+      <div class="details-left">
+        <div class="info-block">
+          <div class="info-content">
+            <h3 id="det-titre">Architecture Web</h3>
+            <p>Département : <strong id="det-dept">Informatique</strong></p>
+            <p style="margin-top: 5px;">Niveau &amp; Période : <span id="det-periode">Master 1 — Semestre 1</span></p>
+          </div>
+          <button class="btn-edit" onclick="openCourseModal(true)">Modifier la matière</button>
+        </div>
+
+        <div class="info-block" style="border-top: 1px solid rgba(13,27,42,0.1); padding-top: 1rem;">
+          <div class="info-content">
+            <p><strong>Groupes d'étudiants associés :</strong></p>
+            <p id="det-classes">M1 Informatique (Groupe Principal)</p>
+          </div>
+          <button class="btn-edit">Gérer les groupes</button>
+        </div>
+      </div>
+
+      <div class="details-right">
+        <div class="assignment-box">
+          <label>Affecter un enseignant</label>
+          <select class="assignment-select" id="profSelect">
+            <option value="Dr. Julian Moreau">Dr. Julian Moreau</option>
+            <option value="Mme. Claire Dubois">Mme. Claire Dubois</option>
+            <option value="Prof. Martin">Prof. Martin</option>
+            <option value="Aucun">Retirer l'affectation</option>
+          </select>
+          <button class="btn-assign" onclick="applyTeacherAssignment()">Valider l'affectation</button>
+        </div>
+
+        <div class="danger-zone">
+          <button class="btn-danger" onclick="confirmDeleteCourse(null, document.getElementById('det-titre').innerText)">
+            🗑️ Supprimer la matière
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="courseModal">
+    <div class="modal-box">
+      <button class="btn-close" onclick="closeCourseModal()">✕</button>
+      <div class="modal-title" id="modalTitle">Créer un nouveau cours</div>
+      
+      <form id="courseForm" class="form-grid" onsubmit="saveCourseData(event)">
+        <div class="form-group full-width">
+          <label>Intitulé du cours</label>
+          <input type="text" id="form-titre" required placeholder="Ex: Base de données NoSQL">
+        </div>
+        
+        <div class="form-group">
+          <label>Département</label>
+          <select id="form-dept" required>
+            <option value="Informatique">Informatique</option>
+            <option value="Web Design">Web Design</option>
+            <option value="Marketing">Marketing</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Semestre</label>
+          <select id="form-semestre" required>
+            <option value="Semestre 1">Semestre 1</option>
+            <option value="Semestre 2">Semestre 2</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Niveau / Niveau d'études</label>
+          <input type="text" id="form-niveau" required placeholder="Ex: Master 1, Licence 3">
+        </div>
+
+        <div class="form-group">
+          <label>Classe associée d'office</label>
+          <input type="text" id="form-classe" placeholder="Ex: M1 Informatique">
+        </div>
+
+        <div class="modal-btns full-width">
+          <button type="button" class="btn-cancel" onclick="closeCourseModal()">Annuler</button>
+          <button type="submit" class="btn-save">Enregistrer la matière</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>© 2026 SmartCampus — Tous droits réservés</footer>
+
+  <script>
+    // 1. Sélectionner un cours dans le tableau pour charger la fiche
+    function selectCourse(titre, dept, periode, prof, classes) {
+      document.getElementById('det-titre').innerText = titre;
+      document.getElementById('det-dept').innerText = dept;
+      document.getElementById('det-periode').innerText = periode;
+      document.getElementById('det-classes').innerText = classes;
+      
+      // Sélectionne automatiquement le bon prof dans le menu d'affectation
+      const select = document.getElementById('profSelect');
+      if(prof === "Non affecté") {
+        select.value = "Aucun";
+      } else {
+        select.value = prof;
+      }
+
+      const card = document.getElementById('courseDetailsCard');
+      card.style.opacity = '0.4';
+      setTimeout(() => card.style.opacity = '1', 120);
+    }
+
+    // 2. Traitement rapide de l'affectation d'un enseignant
+    function applyTeacherAssignment() {
+      const cours = document.getElementById('det-titre').innerText;
+      const prof = document.getElementById('profSelect').value;
+      
+      if(prof === "Aucun") {
+        alert("L'enseignant a été retiré de la matière : " + cours);
+      } else {
+        alert("Succès : " + prof + " est désormais officiellement affecté(e) au cours de \"" + cours + "\".");
+      }
+    }
+
+    // 3. Fenêtres Modales (Ouvrir / Fermer)
+    function openCourseModal(isEditMode) {
+      if(isEditMode) {
+        document.getElementById('modalTitle').innerText = "Modifier les informations du cours";
+        // Pré-remplit avec les valeurs de la fiche active
+        document.getElementById('form-titre').value = document.getElementById('det-titre').innerText;
+        document.getElementById('form-dept').value = document.getElementById('det-dept').innerText;
+        document.getElementById('form-classe').value = document.getElementById('det-classes').innerText;
+      } else {
+        document.getElementById('modalTitle').innerText = "Créer une nouvelle matière académique";
+        document.getElementById('courseForm').reset();
+      }
+      document.getElementById('courseModal').classList.add('open');
+    }
+
+    function closeCourseModal() {
+      document.getElementById('courseModal').classList.remove('open');
+    }
+
+    // 4. Sauvegarde
+    function saveCourseData(event) {
+      event.preventDefault();
+      const titre = document.getElementById('form-titre').value;
+      const dept = document.getElementById('form-dept').value;
+      const niveau = document.getElementById('form-niveau').value;
+      const semestre = document.getElementById('form-semestre').value;
+      const classe = document.getElementById('form-classe').value;
+
+      updateCourseDetailsFromForm(titre, dept, niveau + " — " + semestre, classe);
+      closeCourseModal();
+    }
+
+    function updateCourseDetailsFromForm(titre, dept, periode, classes) {
+      document.getElementById('det-titre').innerText = titre;
+      document.getElementById('det-dept').innerText = dept;
+      document.getElementById('det-periode').innerText = periode;
+      document.getElementById('det-classes').innerText = classes;
+      alert("La matière \"" + titre + "\" a été enregistrée avec succès dans le catalogue des cours.");
+    }
+
+    // 5. Suppression de cours avec sécurité
+    function confirmDeleteCourse(event, courseName) {
+      if(event) event.stopPropagation();
+      const validation = confirm("⚠️ Alerte Sécurité - SmartCampus :\nÊtes-vous sûr de vouloir supprimer définitivement le cours de \"" + courseName + "\" ?\nCela retirera également cette matière de tous les emplois du temps associés.");
+      if(validation) {
+        alert("Le cours de \"" + courseName + "\" a été radié du catalogue.");
+      }
+    }
+  </script>
+</body>
+</html>
