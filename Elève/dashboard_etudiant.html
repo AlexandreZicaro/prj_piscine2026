@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Étudiant - SmartCampus</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sky: #b8f0f0;
+      --sky-dark: #8de0e0;
+      --navy: #0d1b2a;
+      --teal: #0a9396;
+      --teal-light: #94d2bd;
+      --white: #f8fffe;
+      --alert: #e63946;
+      --warning: #f4a261;
+      --success: #2a9d8f;
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--sky);
+      color: var(--navy);
+      overflow-x: hidden;
+    }
+
+    .bg-blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.35; pointer-events: none; z-index: 0; }
+    .blob1 { width: 480px; height: 480px; background: var(--teal); top: -100px; left: -80px; }
+    .blob2 { width: 360px; height: 360px; background: #00b4d8; bottom: 60px; right: -60px; }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; align-items: center;
+      background: var(--navy); padding: 0 2rem; height: 52px; z-index: 100;
+    }
+    .nav-logo-img { height: 32px; margin-right: 12px; border-radius: 4px; object-fit: contain; }
+    .nav-brand { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--white); letter-spacing: 0.04em; }
+    .nav-links { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+    .nav-links a {
+      font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--sky);
+      text-decoration: none; padding: 6px 14px; border-radius: 4px; transition: background .2s, color .2s;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .nav-links a:hover { background: var(--teal); color: #fff; }
+    .nav-links a.active { background: var(--teal); color: #fff; }
+    .nav-bell { position: relative; font-size: 1.1rem; color: var(--sky); cursor: pointer; margin: 0 8px; transition: transform 0.2s, color 0.2s; }
+    .nav-bell:hover { transform: scale(1.1); color: #fff; }
+    .nav-bell::after { content: ''; position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--alert); border-radius: 50%; border: 2px solid var(--navy); }
+
+    .dashboard-wrapper {
+      position: relative; z-index: 1; width: 100%; max-width: 1300px;
+      margin: 0 auto; padding: 5rem 1.5rem 4rem 1.5rem;
+      display: grid; grid-template-columns: 1fr; gap: 2.5rem;
+    }
+    @media (min-width: 992px) { .dashboard-wrapper { grid-template-columns: 2fr 1fr; } }
+    .main-col, .side-col { display: flex; flex-direction: column; gap: 2rem; }
+
+    .glass-panel {
+      background: rgba(255,255,255,0.55); backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.7); border-radius: 16px;
+      box-shadow: 0 6px 28px rgba(0,0,0,.06); padding: 1.5rem;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .glass-panel:hover { box-shadow: 0 12px 36px rgba(10,147,150,.15); }
+
+    .page-header h1 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--navy); margin-bottom: 0.5rem; }
+    .page-header p {
+      font-size: 0.95rem; font-weight: 600; color: var(--navy);
+      background: rgba(255,255,255,0.55); display: inline-block; padding: 6px 14px;
+      border-radius: 20px; border: 1px solid rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+    }
+
+    .section-divider { border: none; border-top: 2px solid rgba(13, 27, 42, 0.1); margin: 0.5rem 0; }
+
+    /* KPIs */
+    .kpi-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .kpi-card { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 1.5rem 1rem; }
+    .kpi-title { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+    .kpi-value { font-size: 2.4rem; font-weight: 800; line-height: 1; color: var(--teal); }
+    .kpi-value.alert { color: var(--alert); }
+    .kpi-value.warning { color: var(--warning); }
+
+    .card-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+    /* Prochains cours */
+    .std-card h2 {
+      font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--navy);
+      border-bottom: 2px solid rgba(13, 27, 42, 0.1); padding-bottom: 10px; margin-bottom: 15px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .std-card h2 span.badge {
+      background: var(--teal); color: var(--white); font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; font-weight: 600;
+    }
+    .std-card h2 span.badge.alert { background: var(--alert); }
+
+    .list-item { padding: 12px 0; border-bottom: 1px solid rgba(13, 27, 42, 0.08); }
+    .list-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .item-title { font-weight: 700; font-size: 0.95rem; display: block; color: var(--navy); }
+    .item-sub { font-size: 0.85rem; color: #4a6a6a; margin-top: 4px; display: block; }
+    .item-tag {
+      display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 8px; margin-top: 5px; text-transform: uppercase;
+    }
+    .tag-present { background: rgba(42,157,143,0.15); color: var(--success); }
+    .tag-absent { background: rgba(230,57,70,0.15); color: var(--alert); }
+
+    /* Tableau des notes */
+    .notes-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .notes-table th {
+      font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: #3d5a5a; padding: 8px 12px; text-align: left;
+      border-bottom: 2px solid rgba(13,27,42,0.1);
+    }
+    .notes-table td { padding: 10px 12px; border-bottom: 1px solid rgba(13,27,42,0.06); color: var(--navy); }
+    .notes-table tr:last-child td { border-bottom: none; }
+    .notes-table .note-val { font-weight: 800; font-size: 1rem; color: var(--teal); }
+    .notes-table .note-val.low { color: var(--alert); }
+    .notes-table .note-val.mid { color: var(--warning); }
+
+    .moyenne-bar {
+      margin-top: 1rem; background: rgba(255,255,255,0.6); border-radius: 12px; padding: 12px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .moyenne-label { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; }
+    .moyenne-val { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--teal); }
+
+    /* Notifications */
+    .notif-item {
+      display: flex; gap: 12px; padding: 10px 0;
+      border-bottom: 1px solid rgba(13, 27, 42, 0.08);
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-icon { font-size: 1.2rem; min-width: 30px; text-align: center; }
+    .notif-text { font-size: 0.88rem; color: var(--navy); line-height: 1.4; }
+    .notif-text strong { font-weight: 700; }
+    .notif-time { font-size: 0.75rem; color: #6a8a8a; margin-top: 2px; display: block; }
+
+    .msg-btn {
+      width: 100%; margin-top: 15px; padding: 12px;
+      background: rgba(255,255,255,0.6); color: var(--teal);
+      font-family: 'Syne', sans-serif; font-weight: 700;
+      border: 1px solid rgba(10, 147, 150, 0.3); border-radius: 10px;
+      cursor: pointer; transition: all 0.2s; text-decoration: none;
+      display: block; text-align: center;
+    }
+    .msg-btn:hover { background: var(--teal); color: var(--white); }
+
+    /* Side col */
+    .img-box { width: 100%; height: 200px; border-radius: 12px; margin-bottom: 1rem; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .img-box img { width: 100%; height: 100%; object-fit: cover; }
+
+    .edt-mini h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; margin-bottom: 1rem; color: var(--navy); border-bottom: 2px solid rgba(13, 27, 42, 0.1); padding-bottom: 10px; }
+    .edt-slot { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+    .edt-time { font-size: 0.75rem; font-weight: 700; color: var(--teal); min-width: 50px; margin-top: 3px; }
+    .edt-course { font-size: 0.88rem; color: var(--navy); line-height: 1.4; }
+    .edt-course strong { font-weight: 700; display: block; }
+    .edt-course span { color: #4a6a6a; font-size: 0.82rem; }
+
+    footer { position: fixed; bottom: 0; left: 0; right: 0; height: 42px; background: var(--navy); display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--teal-light); letter-spacing: 0.08em; z-index: 100; }
+  </style>
+</head>
+<body>
+
+  <div class="bg-blob blob1"></div>
+  <div class="bg-blob blob2"></div>
+
+  <nav>
+    <img src="C:/MAMP/htdocs/WEB_2026/logo.jpg" alt="Logo SmartCampus" class="nav-logo-img">
+    <span class="nav-brand">SmartCampus</span>
+    <div class="nav-links">
+      <a href="C:/MAMP/htdocs/WEB_2026/dashboard_etudiant.html" class="active">Tableau de bord</a>
+      <a href="C:/MAMP/htdocs/WEB_2026/mes_notes.html">Mes Notes</a>
+      <a href="C:/MAMP/htdocs/WEB_2026/gestion_edt.html">Emploi du temps</a>
+      <a href="#">Profil : Étudiant</a>
+      <div class="nav-bell" title="Notifications">🔔</div>
+    </div>
+  </nav>
+
+  <main class="dashboard-wrapper">
+
+    <div class="main-col">
+
+      <div class="page-header">
+        <h1>Tableau de bord Étudiant</h1>
+        <p id="current-date">Date</p>
+      </div>
+
+      <hr class="section-divider">
+
+      <!-- KPIs -->
+      <div class="kpi-container">
+        <div class="glass-panel kpi-card">
+          <div class="kpi-title">Moyenne Générale</div>
+          <div class="kpi-value">14,8</div>
+        </div>
+        <div class="glass-panel kpi-card">
+          <div class="kpi-title">Cours Suivis</div>
+          <div class="kpi-value">6</div>
+        </div>
+        <div class="glass-panel kpi-card">
+          <div class="kpi-title">Absences</div>
+          <div class="kpi-value warning">2</div>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <!-- Mes notes -->
+      <div class="glass-panel std-card">
+        <h2>Mes Notes <span class="badge">Semestre 2</span></h2>
+        <table class="notes-table">
+          <thead>
+            <tr>
+              <th>Cours</th>
+              <th>Crédits</th>
+              <th>Coeff.</th>
+              <th>Note /20</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Mathématiques</td>
+              <td>5</td>
+              <td>1,0</td>
+              <td><span class="note-val">16,5</span></td>
+            </tr>
+            <tr>
+              <td>Physique</td>
+              <td>4</td>
+              <td>1,0</td>
+              <td><span class="note-val mid">14,0</span></td>
+            </tr>
+            <tr>
+              <td>Algorithmique</td>
+              <td>5</td>
+              <td>1,5</td>
+              <td><span class="note-val">17,5</span></td>
+            </tr>
+            <tr>
+              <td>Bases de données</td>
+              <td>4</td>
+              <td>1,0</td>
+              <td><span class="note-val mid">15,0</span></td>
+            </tr>
+            <tr>
+              <td>Anglais</td>
+              <td>2</td>
+              <td>1,0</td>
+              <td><span class="note-val low">11,0</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="moyenne-bar">
+          <span class="moyenne-label">Moyenne générale</span>
+          <span class="moyenne-val">14,8 / 20</span>
+        </div>
+        <a href="C:/MAMP/htdocs/WEB_2026/mes_notes.html" class="msg-btn">Voir toutes mes notes</a>
+      </div>
+
+      <hr class="section-divider">
+
+      <!-- Présences et messages -->
+      <div class="card-container">
+        <div class="glass-panel std-card">
+          <h2>Présences récentes</h2>
+          <div class="list-item">
+            <span class="item-title">Algorithmique</span>
+            <span class="item-sub">Aujourd'hui — Salle B205</span>
+            <span class="item-tag tag-present">✔ Présent</span>
+          </div>
+          <div class="list-item">
+            <span class="item-title">Physique</span>
+            <span class="item-sub">Hier — Salle B102</span>
+            <span class="item-tag tag-absent">✘ Absent</span>
+          </div>
+          <div class="list-item">
+            <span class="item-title">Mathématiques</span>
+            <span class="item-sub">Il y a 2 jours — Salle S201</span>
+            <span class="item-tag tag-present">✔ Présent</span>
+          </div>
+        </div>
+
+        <div class="glass-panel std-card">
+          <h2>Messages <span class="badge alert">1 non lu</span></h2>
+          <div class="list-item">
+            <span class="item-title">Administration</span>
+            <span class="item-sub">Réunion pédagogique le 20 Mai.</span>
+          </div>
+          <div class="list-item">
+            <span class="item-title">Mme. Bernard</span>
+            <span class="item-sub">Relevé de notes disponible.</span>
+          </div>
+          <a href="C:/MAMP/htdocs/WEB_2026/messagerie_etudiant.html" class="msg-btn">Accéder à la messagerie</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Colonne droite -->
+    <div class="side-col">
+
+      <div class="glass-panel">
+        <div class="img-box">
+          <img src="C:/MAMP/htdocs/WEB_2026/ville-de-Bordeaux.jpg" alt="Campus">
+        </div>
+        <h3 style="font-family:'Syne',sans-serif;font-size:1.1rem;color:var(--navy);">Espace Étudiant</h3>
+        <p style="font-size:0.85rem;color:#4a6a6a;margin-top:8px;">Accédez à vos cours, notes et emploi du temps depuis cette interface personnalisée.</p>
+      </div>
+
+      <div class="glass-panel edt-mini">
+        <h3>Prochains cours</h3>
+        <div class="edt-slot">
+          <div class="edt-time">08:00</div>
+          <div class="edt-course">
+            <strong>Mathématiques</strong>
+            <span>Salle S201 — Prof. Moreau</span>
+          </div>
+        </div>
+        <div class="edt-slot">
+          <div class="edt-time">10:00</div>
+          <div class="edt-course">
+            <strong>Bases de données</strong>
+            <span>Salle B105 — Prof. Dubois</span>
+          </div>
+        </div>
+        <div class="edt-slot">
+          <div class="edt-time">14:00</div>
+          <div class="edt-course">
+            <strong>Projet Web</strong>
+            <span>Lab 1 — Prof. Martin</span>
+          </div>
+        </div>
+        <div class="edt-slot">
+          <div class="edt-time">16:00</div>
+          <div class="edt-course">
+            <strong>Physique</strong>
+            <span>Salle B102 — Prof. Bernard</span>
+          </div>
+        </div>
+        <a href="C:/MAMP/htdocs/WEB_2026/gestion_edt.html" class="msg-btn">Voir l'emploi du temps complet</a>
+      </div>
+
+      <div class="glass-panel std-card">
+        <h2>Notifications</h2>
+        <div class="notif-item">
+          <div class="notif-icon">📝</div>
+          <div class="notif-text">
+            <strong>Note publiée</strong> — Mathématiques : 16,5
+            <span class="notif-time">Il y a 10 min</span>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon">⚠️</div>
+          <div class="notif-text">
+            <strong>Absence enregistrée</strong> — Physique, 10 Mai
+            <span class="notif-time">Il y a 1h</span>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon">📅</div>
+          <div class="notif-text">
+            <strong>Changement d'emploi du temps</strong> — Projet Web déplacé Lab 1
+            <span class="notif-time">Hier</span>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon">📚</div>
+          <div class="notif-text">
+            <strong>Nouveau cours disponible</strong> — Projet Web — Lab 1
+            <span class="notif-time">Hier</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>© 2026 SmartCampus — Tous droits réservés</footer>
+
+  <script>
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const today = new Date().toLocaleDateString('fr-FR', options);
+    document.getElementById('current-date').textContent = today;
+  </script>
+
+</body>
+</html>
