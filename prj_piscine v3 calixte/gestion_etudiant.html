@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestion Étudiants - SmartCampus</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  
+  <style>
+    /* ── RESET ET VARIABLES ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sky: #b8f0f0;
+      --sky-dark: #8de0e0;
+      --navy: #0d1b2a;
+      --teal: #0a9396;
+      --teal-light: #94d2bd;
+      --white: #f8fffe;
+      --alert: #e63946;
+      --alert-hover: #c1121f;
+      --warning: #f4a261;
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--sky);
+      color: var(--navy);
+      overflow-x: hidden;
+    }
+
+    /* ── HERO BG DECORATION ── */
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob1 { width: 480px; height: 480px; background: var(--teal); top: -100px; left: -80px; }
+    .blob2 { width: 360px; height: 360px; background: #00b4d8; bottom: 60px; right: -60px; }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; align-items: center;
+      background: var(--navy);
+      padding: 0 2rem;
+      height: 52px;
+      z-index: 100;
+    }
+    .nav-logo-img {
+      height: 32px; margin-right: 12px; border-radius: 4px; object-fit: contain;
+    }
+    .nav-brand {
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--white); letter-spacing: 0.04em;
+    }
+    .nav-links {
+      margin-left: auto; display: flex; gap: 12px; align-items: center;
+    }
+    .nav-links a {
+      font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--sky);
+      text-decoration: none; padding: 6px 14px; border-radius: 4px; transition: background .2s, color .2s;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .nav-links a:hover, .nav-links a.active { background: var(--teal); color: #fff; }
+
+    /* ── LAYOUT PRINCIPAL ── */
+    .page-wrapper {
+      position: relative; z-index: 1; width: 100%; max-width: 1200px;
+      margin: 0 auto; padding: 6rem 1.5rem 5rem 1.5rem;
+      display: flex; flex-direction: column; gap: 2rem;
+    }
+
+    /* GLASSMORPHISM PANELS */
+    .glass-panel {
+      background: rgba(255,255,255,0.65); backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.8); border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.06); padding: 1.5rem 2rem;
+    }
+
+    /* ── EN-TÊTE & ZONE FILTRES AVANCÉS ── */
+    .top-actions {
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+    .header-row {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .page-title {
+      font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--navy);
+      background: rgba(255,255,255,0.55); padding: 10px 20px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+    }
+    
+    /* Barre de recherche et filtres */
+    .filters-wrapper {
+      display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; width: 100%;
+    }
+    .search-bar {
+      display: flex; align-items: center; background: rgba(255,255,255,0.8);
+      border: 1.5px solid #cce0e0; border-radius: 10px; padding: 0 14px; flex: 1; min-width: 250px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-bar:focus-within {
+      border-color: var(--teal); box-shadow: 0 0 0 3px rgba(10,147,150,.12);
+    }
+    .search-bar input {
+      border: none; background: transparent; outline: none; padding: 12px 10px; width: 100%;
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--navy);
+    }
+    .search-icon { font-size: 1.2rem; color: var(--teal); }
+
+    /* Menus déroulants de filtrage */
+    .filter-select {
+      background: rgba(255,255,255,0.8); border: 1.5px solid #cce0e0; border-radius: 10px;
+      padding: 12px 20px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--navy);
+      outline: none; cursor: pointer; min-width: 160px; transition: border-color 0.2s;
+    }
+    .filter-select:focus { border-color: var(--teal); }
+
+    .btn-add {
+      background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff;
+      border: none; border-radius: 10px; padding: 12px 24px; font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.08); transition: transform .2s, box-shadow .2s; margin-left: auto;
+    }
+    .btn-add:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(10,147,150,.3); }
+
+    /* ── TABLEAU ÉTUDIANTS ── */
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th {
+      font-family: 'Syne', sans-serif; font-weight: 700; color: var(--navy);
+      padding: 15px 10px; border-bottom: 2px solid rgba(13, 27, 42, 0.2);
+    }
+    td {
+      padding: 15px 10px; border-bottom: 1px solid rgba(13, 27, 42, 0.08);
+      font-size: 0.95rem; color: var(--navy);
+    }
+    tr:hover td { background: rgba(255,255,255,0.4); cursor: pointer; }
+    
+    .action-links button {
+      background: none; border: none; color: var(--teal); font-weight: 600; font-family: 'DM Sans', sans-serif;
+      cursor: pointer; margin-right: 12px; font-size: 0.85rem;
+    }
+    .action-links button:hover { text-decoration: underline; }
+
+    /* ── FICHE DÉTAILS ÉTUDIANT ── */
+    .details-grid {
+      display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; align-items: stretch;
+    }
+    .details-left { display: flex; flex-direction: column; gap: 1.5rem; }
+    .details-right {
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+      border-left: 2px solid rgba(13, 27, 42, 0.08); padding-left: 2rem;
+    }
+
+    .info-block { display: flex; justify-content: space-between; align-items: flex-start; }
+    .info-content h3 { font-family: 'Syne', sans-serif; font-size: 1.4rem; color: var(--navy); margin-bottom: 5px; }
+    .info-content p { color: #4a6a6a; font-size: 0.95rem; line-height: 1.5; }
+    .info-content strong { color: var(--navy); }
+    
+    .btn-edit {
+      background: transparent; border: 1.5px solid var(--teal); color: var(--teal);
+      padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; font-family: 'Syne', sans-serif; text-transform: uppercase;
+    }
+    .btn-edit:hover { background: var(--teal); color: var(--white); }
+
+    /* Graphique Radar & Moyenne */
+    .stats-box { text-align: center; margin-bottom: 1rem; }
+    .stats-box .moyenne {
+      font-size: 2.5rem; font-weight: 800; color: var(--teal); font-family: 'Syne', sans-serif; line-height: 1;
+    }
+    .stats-box span { font-size: 0.9rem; font-weight: 600; color: #4a6a6a; text-transform: uppercase; }
+    .radar-chart { width: 150px; height: 150px; margin: 15px 0; }
+
+    /* Zone de Danger */
+    .danger-zone {
+      width: 100%; border-top: 2px dashed rgba(230, 57, 70, 0.3); padding-top: 15px; text-align: center;
+    }
+    .btn-danger {
+      background: var(--alert); color: #fff; border: none; border-radius: 10px;
+      padding: 12px 24px; font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+      transition: background 0.2s, transform 0.2s; box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+    }
+    .btn-danger:hover { background: var(--alert-hover); transform: translateY(-2px); }
+
+    /* ── STYLE DE LA FENÊTRE MODALE D'ÉDITION ÉTUDIANT ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(13,27,42,.45); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; z-index: 200;
+      opacity: 0; pointer-events: none; transition: opacity .3s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--white); border-radius: 20px; width: 550px; max-width: 94vw;
+      padding: 2rem; box-shadow: 0 28px 80px rgba(0,0,0,.18); position: relative;
+      max-height: 85vh; overflow-y: auto;
+    }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--navy); margin-bottom: 1.5rem; }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .full-width { grid-column: span 2; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; color: #3d5a5a; letter-spacing: 0.05em; }
+    .form-group input {
+      padding: 10px 14px; border: 1.5px solid #cce0e0; border-radius: 10px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.93rem; color: var(--navy); outline: none; background: #f0fafa;
+    }
+    .form-group input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(10,147,150,.12); }
+    
+    .modal-btns { display: flex; gap: 1rem; margin-top: 2rem; }
+    .btn-save {
+      flex: 1; padding: 12px; background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff;
+      border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer;
+    }
+    .btn-cancel {
+      padding: 12px 24px; background: #e0f0ef; color: var(--navy); border: none; border-radius: 12px;
+      font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer;
+    }
+    .btn-close { position: absolute; top: 16px; right: 18px; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #6b8080; }
+
+    @media (max-width: 900px) {
+      .details-grid { grid-template-columns: 1fr; }
+      .details-right { border-left: none; border-top: 2px solid rgba(13, 27, 42, 0.08); padding-left: 0; padding-top: 2rem; }
+      .form-grid { grid-template-columns: 1fr; }
+      .full-width { grid-column: span 1; }
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 42px; background: var(--navy);
+      display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem; color: var(--teal-light); letter-spacing: 0.08em; z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-blob blob1"></div>
+  <div class="bg-blob blob2"></div>
+
+  <nav>
+    <img src="logo.jpg" alt="Logo" class="nav-logo-img">
+    <span class="nav-brand">SmartCampus</span>
+    <div class="nav-links">
+      <a href="menu_admin.html">Menu</a>
+      <a href="dashboard_admin.html">Tableau de bord</a>
+      
+      <a href="#" class="active">Profil : Administrateur</a>
+    </div>
+  </nav>
+
+  <main class="page-wrapper">
+    
+    <div class="top-actions">
+      <div class="header-row">
+        <div class="page-title">Gestion étudiants</div>
+        <a href="ajout_etudiant.html" class="btn-add">👤+ Ajout étudiant </a>
+      </div>
+      
+      <div class="filters-wrapper">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="search" placeholder="Rechercher par nom, prénom ou email..." id="searchInput">
+        </div>
+        
+        <select class="filter-select" id="promoFilter">
+          <option value="">Toutes les promos</option>
+          <option value="2026">Promo 2026</option>
+          <option value="2025">Promo 2025</option>
+          <option value="2024">Promo 2024</option>
+        </select>
+        
+        <select class="filter-select" id="classFilter">
+          <option value="">Toutes les classes</option>
+          <option value="Informatique">Informatique</option>
+          <option value="Web Design">Web Design</option>
+          <option value="Marketing">Marketing</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="glass-panel table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Nom Prénom</th>
+            <th>Email</th>
+            <th>Parcours / Classe</th>
+            <th>Moyenne</th>
+            <th>Actions (CRUD)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr onclick="updateDetails('Jean Dupont', 'jean.dupont@smartcampus.fr', 'Master Informatique', '14.5', '06 12 34 56 78', '12/04/2003', 'Lycée Montaigne', 'Licence Informatique')">
+            <td>Jean Dupont</td>
+            <td>jean.dupont@smartcampus.fr</td>
+            <td>Master Informatique</td>
+            <td><strong>14.5</strong></td>
+            <td class="action-links">
+              <button onclick="openEditModal(event)">Éditer tout</button>
+              <button style="color: var(--alert);" onclick="confirmDelete(event, 'Jean Dupont')">Supprimer</button>
+            </td>
+          </tr>
+          <tr onclick="updateDetails('Sophie Martin', 'sophie.m@smartcampus.fr', 'Licence Web Design', '16.2', '07 89 45 61 23', '24/09/2004', 'Lycée Condorcet', 'BAC STI2D')">
+            <td>Sophie Martin</td>
+            <td>sophie.m@smartcampus.fr</td>
+            <td>Licence Web Design</td>
+            <td><strong>16.2</strong></td>
+            <td class="action-links">
+              <button onclick="openEditModal(event)">Éditer tout</button>
+              <button style="color: var(--alert);" onclick="confirmDelete(event, 'Sophie Martin')">Supprimer</button>
+            </td>
+          </tr>
+          <tr onclick="updateDetails('Lucas Bernard', 'lucas.b@smartcampus.fr', 'Bachelor Marketing', '12.8', '06 55 44 33 22', '05/11/2002', 'Lycée Daguin', 'BTS Communication')">
+            <td>Lucas Bernard</td>
+            <td>lucas.b@smartcampus.fr</td>
+            <td>Bachelor Marketing</td>
+            <td><strong>12.8</strong></td>
+            <td class="action-links">
+              <button onclick="openEditModal(event)">Éditer tout</button>
+              <button style="color: var(--alert);" onclick="confirmDelete(event, 'Lucas Bernard')">Supprimer</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="glass-panel details-grid" id="studentDetails">
+      
+      <div class="details-left">
+        
+        <div class="info-block">
+          <div class="info-content">
+            <h3 id="det-nom">Jean Dupont</h3>
+            <p id="det-email">jean.dupont@smartcampus.fr</p>
+          </div>
+          <button class="btn-edit" onclick="openEditModal(null)">Modifier infos</button>
+        </div>
+
+        <div class="info-block" style="border-top: 1px solid rgba(13,27,42,0.1); padding-top: 1rem;">
+          <div class="info-content">
+            <p><strong>Ses infos :</strong></p>
+            <p>Date de naissance : <span id="det-naissance">12/04/2003</span><br>Téléphone : <span id="det-tel">06 12 34 56 78</span></p>
+          </div>
+          <button class="btn-edit" onclick="openEditModal(null)">Modifier infos</button>
+        </div>
+
+        <div class="info-block" style="border-top: 1px solid rgba(13,27,42,0.1); padding-top: 1rem;">
+          <div class="info-content">
+            <p><strong>Parcours académique :</strong></p>
+            <p id="det-parcours">Master Informatique</p>
+            <p style="font-size: 0.85rem; color: #6b8080;">Ancienne école : <span id="det-ecole">Lycée Montaigne</span><br>Dernier diplôme : <span id="det-diplome">Licence Informatique</span></p>
+          </div>
+          <button class="btn-edit" onclick="openEditModal(null)">modifier infos complètes</button>
+        </div>
+
+      </div>
+
+      <div class="details-right">
+        
+        <div class="stats-box">
+          <span>Moyenne Générale</span>
+          <div class="moyenne" id="det-moyenne">14.5</div>
+          
+          <svg class="radar-chart" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,5 95,35 80,90 20,90 5,35" fill="none" stroke="#cce0e0" stroke-width="1"/>
+            <polygon points="50,25 75,45 65,75 35,75 25,45" fill="none" stroke="#cce0e0" stroke-width="1"/>
+            <line x1="50" y1="50" x2="50" y2="5" stroke="#cce0e0" stroke-width="1"/>
+            <line x1="50" y1="50" x2="95" y2="35" stroke="#cce0e0" stroke-width="1"/>
+            <line x1="50" y1="50" x2="80" y2="90" stroke="#cce0e0" stroke-width="1"/>
+            <line x1="50" y1="50" x2="20" y2="90" stroke="#cce0e0" stroke-width="1"/>
+            <line x1="50" y1="50" x2="5" y2="35" stroke="#cce0e0" stroke-width="1"/>
+            <polygon points="50,15 80,40 70,80 30,70 15,45" fill="rgba(10, 147, 150, 0.4)" stroke="var(--teal)" stroke-width="2"/>
+          </svg>
+        </div>
+
+        <div class="danger-zone">
+          <button class="btn-danger" onclick="confirmDelete(null, document.getElementById('det-nom').innerText)">
+            🗑️ Supprimer étudiant
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+      <button class="btn-close" onclick="closeEditModal()">✕</button>
+      <div class="modal-title">Éditer le profil étudiant</div>
+      
+      <form id="editStudentForm" class="form-grid" onsubmit="saveStudentChanges(event)">
+        <div class="form-group">
+          <label>Prénom &amp; Nom</label>
+          <input type="text" id="input-nom" required>
+        </div>
+        <div class="form-group">
+          <label>Adresse E-mail</label>
+          <input type="email" id="input-email" required>
+        </div>
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input type="text" id="input-tel">
+        </div>
+        <div class="form-group">
+          <label>Date de naissance</label>
+          <input type="text" id="input-naissance">
+        </div>
+        <div class="form-group">
+          <label>Classe / Filière académique</label>
+          <input type="text" id="input-parcours" required>
+        </div>
+        <div class="form-group">
+          <label>Moyenne Générale</label>
+          <input type="text" id="input-moyenne" required>
+        </div>
+        <div class="form-group full-width">
+          <label>Ancienne École</label>
+          <input type="text" id="input-ecole">
+        </div>
+        <div class="form-group full-width">
+          <label>Dernier Diplôme obtenu</label>
+          <input type="text" id="input-diplome">
+        </div>
+        
+        <div class="modal-btns full-width">
+          <button type="button" class="btn-cancel" onclick="closeEditModal()">Annuler</button>
+          <button type="submit" class="btn-save">Enregistrer les modifications</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>© 2026 SmartCampus — Tous droits réservés</footer>
+
+  <script>
+    // Variables de stockage temporaire de l'étudiant pointé
+    let currentStudentData = {};
+
+    // 1. Mettre à jour la fiche en bas au clic sur le tableau
+    function updateDetails(nom, email, parcours, moyenne, tel, naissance, ecole, diplome) {
+      currentStudentData = { nom, email, parcours, moyenne, tel, naissance, ecole, diplome };
+
+      document.getElementById('det-nom').innerText = nom;
+      document.getElementById('det-email').innerText = email;
+      document.getElementById('det-parcours').innerText = parcours;
+      document.getElementById('det-moyenne').innerText = moyenne;
+      document.getElementById('det-tel').innerText = tel;
+      document.getElementById('det-naissance').innerText = naissance;
+      document.getElementById('det-ecole').innerText = ecole;
+      document.getElementById('det-diplome').innerText = diplome;
+      
+      const card = document.getElementById('studentDetails');
+      card.style.opacity = '0.5';
+      setTimeout(() => card.style.opacity = '1', 100);
+    }
+
+    // 2. Ouvrir la modale d'édition avec toutes les valeurs chargées
+    function openEditModal(event) {
+      if(event) event.stopPropagation(); // Évite de re-sélectionner la ligne
+      
+      // Injecte les données actuelles dans les inputs de la modale
+      document.getElementById('input-nom').value = document.getElementById('det-nom').innerText;
+      document.getElementById('input-email').value = document.getElementById('det-email').innerText;
+      document.getElementById('input-tel').value = document.getElementById('det-tel').innerText;
+      document.getElementById('input-naissance').value = document.getElementById('det-naissance').innerText;
+      document.getElementById('input-parcours').value = document.getElementById('det-parcours').innerText;
+      document.getElementById('input-moyenne').value = document.getElementById('det-moyenne').innerText;
+      document.getElementById('input-ecole').value = document.getElementById('det-ecole').innerText;
+      document.getElementById('input-diplome').value = document.getElementById('det-diplome').innerText;
+
+      document.getElementById('editModal').classList.add('open');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('open');
+    }
+
+    // 3. Sauvegarder les modifications saisies dans la modale
+    function saveStudentChanges(event) {
+      event.preventDefault();
+      
+      const nom = document.getElementById('input-nom').value;
+      const email = document.getElementById('input-email').value;
+      const parcours = document.getElementById('input-parcours').value;
+      const moyenne = document.getElementById('input-moyenne').value;
+      const tel = document.getElementById('input-tel').value;
+      const naissance = document.getElementById('input-naissance').value;
+      const ecole = document.getElementById('input-ecole').value;
+      const diplome = document.getElementById('input-diplome').value;
+      
+      // Met à jour l'affichage de la fiche en direct
+      updateDetails(nom, email, parcours, moyenne, tel, naissance, ecole, diplome);
+      
+      alert("Modifications enregistrées avec succès pour l'étudiant " + nom + " !");
+      closeEditModal();
+    }
+
+    // 4. Supprimer un étudiant avec sécurité
+    function confirmDelete(event, studentName) {
+      if(event) event.stopPropagation();
+      const confirmation = confirm("⚠️ ATTENTION :\nÊtes-vous sûr de vouloir supprimer définitivement l'étudiant(e) " + studentName + " ?");
+      if(confirmation) {
+        alert("L'étudiant(e) " + studentName + " a été retiré(e) du système.");
+      }
+    }
+  </script>
+
+</body>
+</html>
