@@ -7,41 +7,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --sky: #b8f0f0;
-      --sky-dark: #8de0e0;
-      --navy: #0d1b2a;
-      --teal: #0a9396;
-      --teal-light: #94d2bd;
-      --white: #f8fffe;
-      --alert: #e63946;
-    }
-
-    html, body {
-      height: 100%;
-      font-family: 'DM Sans', sans-serif;
-      background: var(--sky);
-      overflow: hidden;
-    }
+    :root { --sky: #b8f0f0; --sky-dark: #8de0e0; --navy: #0d1b2a; --teal: #0a9396; --teal-light: #94d2bd; --white: #f8fffe; --alert: #e63946; }
+    html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--sky); overflow: hidden; }
 
     /* ── NAVBAR ── */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0;
-      display: flex; align-items: center;
-      background: var(--navy);
-      padding: 0 2rem;
-      height: 52px;
-      z-index: 100;
-    }
+    nav { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; background: var(--navy); padding: 0 2rem; height: 52px; z-index: 100; }
     .nav-logo-img { height: 32px; margin-right: 12px; border-radius: 4px; object-fit: contain; }
     .nav-brand { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--white); letter-spacing: 0.04em; }
     .nav-links { margin-left: auto; display: flex; gap: 6px; }
-    .nav-links a {
-      font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--sky);
-      text-decoration: none; padding: 6px 14px; border-radius: 4px; transition: background .2s, color .2s;
-      letter-spacing: 0.04em; text-transform: uppercase;
-    }
+    .nav-links a { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--sky); text-decoration: none; padding: 6px 14px; border-radius: 4px; transition: background .2s, color .2s; letter-spacing: 0.04em; text-transform: uppercase; }
     .nav-links a:hover, .nav-links a.active { background: var(--teal); color: #fff; }
 
     /* ── HERO BG DECORATION ── */
@@ -50,28 +24,11 @@
     .blob2 { width: 360px; height: 360px; background: #00b4d8; bottom: 60px; right: -60px; }
 
     /* ── PAGE LAYOUT ── */
-    .page {
-      position: relative; height: 100vh; display: flex; flex-direction: column; align-items: center; padding-top: 52px; z-index: 1;
-    }
-
-    .welcome-banner {
-      margin-top: 3.5rem; background: rgba(255,255,255,0.55); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.7);
-      border-radius: 12px; padding: 14px 52px; font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--navy);
-      letter-spacing: 0.04em; text-align: center; animation: fadeDown .6s ease both;
-    }
-
+    .page { position: relative; height: 100vh; display: flex; flex-direction: column; align-items: center; padding-top: 52px; z-index: 1; }
+    .welcome-banner { margin-top: 3.5rem; background: rgba(255,255,255,0.55); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.7); border-radius: 12px; padding: 14px 52px; font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--navy); letter-spacing: 0.04em; text-align: center; animation: fadeDown .6s ease both; }
     .cards { display: flex; gap: 3.5rem; margin-top: 4rem; animation: fadeUp .7s .15s ease both; }
-
-    .card {
-      width: 220px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
-      background: rgba(255,255,255,0.55); backdrop-filter: blur(14px); border: 1.5px solid rgba(255,255,255,0.8); border-radius: 20px;
-      cursor: pointer; text-decoration: none; color: var(--navy); transition: transform .25s, box-shadow .25s;
-      box-shadow: 0 6px 28px rgba(0,0,0,.06); position: relative; overflow: hidden;
-    }
-    .card::before {
-      content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--teal) 0%, #00b4d8 100%);
-      opacity: 0; transition: opacity .3s; border-radius: 18px;
-    }
+    .card { width: 220px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: rgba(255,255,255,0.55); backdrop-filter: blur(14px); border: 1.5px solid rgba(255,255,255,0.8); border-radius: 20px; cursor: pointer; text-decoration: none; color: var(--navy); transition: transform .25s, box-shadow .25s; box-shadow: 0 6px 28px rgba(0,0,0,.06); position: relative; overflow: hidden; }
+    .card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--teal) 0%, #00b4d8 100%); opacity: 0; transition: opacity .3s; border-radius: 18px; }
     .card:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 18px 48px rgba(10,147,150,.22); }
     .card:hover::before { opacity: 1; }
     .card:hover .card-icon, .card:hover .card-label { color: #fff; }
@@ -79,55 +36,32 @@
     .card-label { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.04em; position: relative; z-index: 1; transition: color .3s; text-align: center; }
 
     /* ── BOUTON ADMIN ── */
-    .btn-admin {
-      margin-top: 3.5rem; padding: 14px 28px; background: linear-gradient(135deg, #1d3557, #457b9d); color: #fff;
-      border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
-      letter-spacing: 0.04em; text-decoration: none; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.15);
-      transition: transform .2s, box-shadow .2s; animation: fadeUp .7s .3s ease both;
-    }
+    .btn-admin { margin-top: 3.5rem; padding: 14px 28px; background: linear-gradient(135deg, #1d3557, #457b9d); color: #fff; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.04em; text-decoration: none; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.15); transition: transform .2s, box-shadow .2s; animation: fadeUp .7s .3s ease both; }
     .btn-admin:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(29, 53, 87, 0.4); }
 
     /* ── MODAL ── */
-    .overlay {
-      position: fixed; inset: 0; background: rgba(13,27,42,.45); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
-      z-index: 200; opacity: 0; pointer-events: none; transition: opacity .3s;
-    }
+    .overlay { position: fixed; inset: 0; background: rgba(13,27,42,.45); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .3s; }
     .overlay.open { opacity: 1; pointer-events: all; }
-    .modal {
-      background: var(--white); border-radius: 20px; width: 400px; max-width: 94vw; padding: 2.4rem 2.2rem 2rem;
-      box-shadow: 0 28px 80px rgba(0,0,0,.18); transform: translateY(24px); transition: transform .35s ease; position: relative; max-height: 90vh; overflow-y: auto;
-    }
+    .modal { background: var(--white); border-radius: 20px; width: 400px; max-width: 94vw; padding: 2.4rem 2.2rem 2rem; box-shadow: 0 28px 80px rgba(0,0,0,.18); transform: translateY(24px); transition: transform .35s ease; position: relative; max-height: 90vh; overflow-y: auto; }
     .overlay.open .modal { transform: translateY(0); }
-
     .modal-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--navy); margin-bottom: 0.3rem; }
     .modal-sub { font-size: 0.84rem; color: #6b8080; margin-bottom: 1.6rem; }
     
     .form-group { margin-bottom: 1rem; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
-    
     label { display: block; font-size: 0.78rem; font-weight: 600; color: #3d5a5a; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
-    input {
-      width: 100%; padding: 10px 14px; border: 1.5px solid #cce0e0; border-radius: 10px; font-family: 'DM Sans', sans-serif;
-      font-size: 0.93rem; color: var(--navy); outline: none; background: #f0fafa; transition: border-color .2s;
-    }
+    input { width: 100%; padding: 10px 14px; border: 1.5px solid #cce0e0; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.93rem; color: var(--navy); outline: none; background: #f0fafa; transition: border-color .2s; }
     input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(10,147,150,.12); background: #fff; }
 
-    .btn-submit {
-      margin-top: 1rem; width: 100%; padding: 12px; background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff;
-      border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform .2s;
-    }
+    .btn-submit { margin-top: 1rem; width: 100%; padding: 12px; background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform .2s; }
     .btn-submit.admin-btn { background: linear-gradient(135deg, #1d3557, #457b9d); }
     .btn-submit:hover { transform: translateY(-2px); }
-
     .modal-footer { margin-top: 1rem; text-align: center; font-size: 0.83rem; color: #6b8080; }
     .modal-footer a { color: var(--teal); font-weight: 600; text-decoration: none; cursor: pointer; }
     .modal-footer a:hover { text-decoration: underline; }
     .btn-close { position: absolute; top: 16px; right: 18px; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #6b8080; }
 
-    footer {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 42px; background: var(--navy); display: flex; align-items: center; justify-content: center;
-      font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--teal-light); letter-spacing: 0.08em; z-index: 100;
-    }
+    footer { position: fixed; bottom: 0; left: 0; right: 0; height: 42px; background: var(--navy); display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--teal-light); letter-spacing: 0.08em; z-index: 100; }
 
     @keyframes fadeDown { from { opacity:0; transform:translateY(-18px); } to { opacity:1; transform:translateY(0); } }
     @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
@@ -136,7 +70,7 @@
 <body>
 
   <nav>
-    <img src="C:/MAMP/htdocs/WEB_2026/logo.jpg" alt="Logo SmartCampus" class="nav-logo-img">
+    <img src="logo.jpg" alt="Logo SmartCampus" class="nav-logo-img">
     <span class="nav-brand">SmartCampus</span>
     <div class="nav-links">
       <a href="#" class="active">Accueil</a>
@@ -174,14 +108,14 @@
       
       <form action="traitement_login.php" method="POST">
         <div class="form-group">
-          <label>Adresse e-mail institutionnelle</label>
+          <label>E-mail Universitaire</label>
           <input type="email" name="email" placeholder="prenom.nom@smartcampus.fr" required />
         </div>
         <div class="form-group">
           <label>Mot de passe</label>
           <input type="password" name="password" placeholder="••••••••" required />
         </div>
-        <button type="submit" class="btn-submit">Se connecter</button>
+        <button type="submit" class="btn-submit">Accéder à mon espace</button>
       </form>
       
       <div class="modal-footer">
@@ -234,14 +168,14 @@
       <div class="modal-title" style="color: #1d3557;">Espace Admin</div>
       <div class="modal-sub">Accès restreint au personnel autorisé</div>
       
-      <form onsubmit="verifyAdmin(event)">
+      <form action="traitement_login.php" method="POST">
         <div class="form-group">
           <label>E-mail Administrateur</label>
-          <input type="email" id="adminEmail" placeholder="admin@smartcampus.fr" required />
+          <input type="email" name="email" placeholder="admin@smartcampus.fr" required />
         </div>
         <div class="form-group">
           <label>Mot de passe</label>
-          <input type="password" id="adminPass" placeholder="••••••••" required />
+          <input type="password" name="password" placeholder="••••••••" required />
         </div>
         <button type="submit" class="btn-submit admin-btn">Déverrouiller le Dashboard</button>
       </form>
@@ -261,21 +195,6 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
     });
-
-    // Fonction de vérification temporaire de l'admin (En attendant le PHP)
-    function verifyAdmin(event) {
-      event.preventDefault(); // Empêche le rechargement de la page
-      
-      const email = document.getElementById('adminEmail').value;
-      const pass = document.getElementById('adminPass').value;
-
-      // Vérification stricte basée sur ton INSERT INTO
-      if (email === 'pedropascal@gmail.com' && pass === 'pedro') {
-        window.location.href = 'C:/MAMP/htdocs/WEB_2026/dashboard_admin.html';
-      } else {
-        alert('Erreur : Identifiants administrateur incorrects ou accès refusé.');
-      }
-    }
   </script>
 </body>
 </html>
