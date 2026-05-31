@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestion des Présences - SmartCampus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --sky: #b8f0f0; --navy: #0d1b2a; --teal: #0a9396; --teal-light: #94d2bd; --white: #f8fffe; --alert: #e63946; --success: #2a9d8f; --warning: #f4a261; }
+    html, body { min-height: 100vh; font-family: 'DM Sans', sans-serif; background: var(--sky); color: var(--navy); overflow-x: hidden; }
+    .bg-blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.35; pointer-events: none; z-index: 0; }
+    .blob1 { width: 480px; height: 480px; background: var(--teal); top: -100px; left: -80px; }
+    .blob2 { width: 360px; height: 360px; background: #00b4d8; bottom: 60px; right: -60px; }
+    nav { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; background: var(--navy); padding: 0 2rem; height: 52px; z-index: 100; }
+    .nav-logo-img { height: 32px; margin-right: 12px; border-radius: 4px; object-fit: contain; }
+    .nav-brand { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--white); letter-spacing: 0.04em; }
+    .nav-links { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+    .nav-links a { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--sky); text-decoration: none; padding: 6px 14px; border-radius: 4px; transition: background .2s; text-transform: uppercase; }
+    .nav-links a:hover, .nav-links a.active { background: var(--teal); color: #fff; }
+
+    .page-wrapper { position: relative; z-index: 1; width: 100%; max-width: 1000px; margin: 0 auto; padding: 6rem 1.5rem 5rem; display: flex; flex-direction: column; gap: 2rem; }
+    .glass-panel { background: rgba(255,255,255,0.65); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.8); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,.06); padding: 1.5rem 2rem; }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .page-title { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--navy); background: rgba(255,255,255,0.55); padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.8); }
+
+    .filters-wrapper { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .filter-select { background: rgba(255,255,255,0.8); border: 1.5px solid #cce0e0; border-radius: 10px; padding: 10px 16px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--navy); outline: none; cursor: pointer; min-width: 200px; }
+
+    .panel-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; padding-bottom: 10px; border-bottom: 2px solid rgba(13,27,42,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .panel-title .date-info { font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 400; color: #6b8080; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { font-family: 'Syne', sans-serif; font-weight: 700; padding: 12px 14px; border-bottom: 2px solid rgba(13,27,42,0.2); font-size: 0.82rem; text-transform: uppercase; color: #3d5a5a; }
+    td { padding: 14px; border-bottom: 1px solid rgba(13,27,42,0.07); font-size: 0.95rem; }
+    tr:hover td { background: rgba(255,255,255,0.5); }
+
+    /* Toggle présence/absence */
+    .presence-toggle { display: flex; border-radius: 8px; overflow: hidden; border: 1.5px solid #cce0e0; width: fit-content; }
+    .toggle-btn { padding: 7px 16px; border: none; background: rgba(255,255,255,0.8); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .toggle-btn.present.active { background: var(--success); color: #fff; }
+    .toggle-btn.absent.active { background: var(--alert); color: #fff; }
+    .toggle-btn.retard.active { background: var(--warning); color: #fff; }
+
+    .absences-count { display: inline-block; font-size: 0.8rem; font-weight: 700; padding: 2px 8px; border-radius: 12px; }
+    .abs-ok { background: rgba(42,157,143,0.15); color: var(--success); }
+    .abs-warn { background: rgba(244,162,97,0.2); color: #c06a10; }
+    .abs-danger { background: rgba(230,57,70,0.15); color: var(--alert); }
+
+    .btn-save-all { background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff; border: none; border-radius: 10px; padding: 12px 28px; font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; transition: transform .2s, box-shadow .2s; }
+    .btn-save-all:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(10,147,150,.3); }
+
+    .btn-select-all { background: rgba(255,255,255,0.7); border: 1.5px solid var(--teal); color: var(--teal); border-radius: 8px; padding: 8px 16px; font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .btn-select-all:hover { background: var(--teal); color: #fff; }
+
+    .summary-bar { display: flex; gap: 1.5rem; align-items: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.5); border-radius: 12px; flex-wrap: wrap; }
+    .summary-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-present { background: var(--success); }
+    .dot-absent { background: var(--alert); }
+    .dot-retard { background: var(--warning); }
+
+    footer { position: fixed; bottom: 0; left: 0; right: 0; height: 42px; background: var(--navy); display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--teal-light); z-index: 100; }
+    .nav-logout { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600; color: #ffb3b8; text-decoration: none; padding: 6px 14px; border-radius: 4px; border: 1px solid rgba(230,57,70,0.4); transition: all .2s; margin-left: 4px; }
+    .nav-logout:hover { background: var(--alert); color: #fff; border-color: var(--alert); }
+  </style>
+</head>
+<body>
+  <div class="bg-blob blob1"></div>
+  <div class="bg-blob blob2"></div>
+
+  <nav>
+    <img src="logo.jpg" alt="Logo" class="nav-logo-img">
+    <span class="nav-brand">SmartCampus</span>
+    <div class="nav-links">
+      <a href="dashboard_enseignant.html">Tableau de bord</a>
+      <a href="gestion_notes.html">Notes</a>
+      <a href="gestion_presences.html" class="active">Présences</a>
+      <a href="#">Profil : Enseignant</a>
+      <a href="deconnexion.php" class="nav-logout">🚪 Déconnexion</a>
+
+
+  <main class="page-wrapper">
+
+    <div class="page-header">
+      <div class="page-title">✅ Gestion des Présences</div>
+      <div class="filters-wrapper">
+        <select class="filter-select" id="coursFilter" onchange="renderTable()">
+          <option value="INFO101">Algorithmique — L1 (Aujourd'hui 08h)</option>
+          <option value="INFO202">Structures de données — L2 (Demain 10h)</option>
+          <option value="INFO301">Bases de données — L3 (Jeudi 14h)</option>
+          <option value="INFO302">Réseaux et Télécoms — L3 (Vendredi 08h)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="glass-panel">
+      <div class="panel-title">
+        Feuille d'appel — <span id="coursLabel">Algorithmique — Groupe L1</span>
+        <span class="date-info" id="dateInfo"></span>
+      </div>
+
+      <div class="summary-bar" id="summaryBar">
+        <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;">Résumé :</span>
+        <div class="summary-item"><div class="dot dot-present"></div><span id="sum-present">0 présents</span></div>
+        <div class="summary-item"><div class="dot dot-absent"></div><span id="sum-absent">0 absents</span></div>
+        <div class="summary-item"><div class="dot dot-retard"></div><span id="sum-retard">0 retards</span></div>
+      </div>
+    </div>
+
+    <div class="glass-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.8rem;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;">Liste des étudiants</div>
+        <div style="display:flex;gap:0.8rem;">
+          <button class="btn-select-all" onclick="setAll('present')">✅ Tous présents</button>
+          <button class="btn-select-all" style="border-color:var(--alert);color:var(--alert);" onclick="setAll('absent')">❌ Tous absents</button>
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nom Prénom</th>
+              <th>Email</th>
+              <th>Présence</th>
+              <th>Absences cumulées</th>
+            </tr>
+          </thead>
+          <tbody id="presenceTbody"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:1.5rem;">
+        <button class="btn-save-all" onclick="savePresences()">💾 Valider la feuille d'appel</button>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>© 2026 SmartCampus — Tous droits réservés</footer>
+
+  <script>
+    const etudiants = [
+      { id:1, nom:'Jervase Gonzague',     email:'gonzague.jervase@smartcampus.fr',    absences:1 },
+      { id:2, nom:'de Cacqueray Calixte', email:'calixte.decacqueray@smartcampus.fr', absences:0 },
+      { id:3, nom:'Causse Charles',       email:'charles.causse@smartcampus.fr',       absences:2 },
+      { id:4, nom:'Cournu Mathias',       email:'mathias.cournu@smartcampus.fr',       absences:5 },
+      { id:5, nom:'Bruguier Victor',      email:'victor.bruguier@smartcampus.fr',      absences:0 },
+      { id:6, nom:'Michot Julien',        email:'julien.michot@smartcampus.fr',        absences:3 },
+      { id:7, nom:'Ledesma Nathan',       email:'nathan.ledesma@smartcampus.fr',       absences:7 },
+    ];
+
+    // État des présences pour la séance en cours
+    const presences = {};
+    etudiants.forEach(e => presences[e.id] = 'present');
+
+    function getAbsClass(n) {
+      if (n <= 1) return 'abs-ok';
+      if (n <= 4) return 'abs-warn';
+      return 'abs-danger';
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('presenceTbody');
+      tbody.innerHTML = '';
+      etudiants.forEach((e, i) => {
+        const p = presences[e.id];
+        tbody.innerHTML += `
+          <tr>
+            <td>${i+1}</td>
+            <td><strong>${e.nom}</strong></td>
+            <td style="color:#4a6a6a;font-size:0.88rem">${e.email}</td>
+            <td>
+              <div class="presence-toggle">
+                <button class="toggle-btn present ${p==='present'?'active':''}"
+                  onclick="setPresence(${e.id},'present',this)">✅ Présent</button>
+                <button class="toggle-btn retard ${p==='retard'?'active':''}"
+                  onclick="setPresence(${e.id},'retard',this)">⏰ Retard</button>
+                <button class="toggle-btn absent ${p==='absent'?'active':''}"
+                  onclick="setPresence(${e.id},'absent',this)">❌ Absent</button>
+              </div>
+            </td>
+            <td><span class="absences-count ${getAbsClass(e.absences)}">${e.absences} abs.</span>
+              ${e.absences >= 5 ? ' ⚠️ <span style="font-size:0.78rem;color:var(--alert);font-weight:700;">Seuil d\'alerte</span>' : ''}
+            </td>
+          </tr>`;
+      });
+      const label = document.getElementById('coursFilter').options[document.getElementById('coursFilter').selectedIndex].text;
+      document.getElementById('coursLabel').textContent = label.split('(')[0].trim();
+      updateSummary();
+
+      // Date du jour
+      document.getElementById('dateInfo').textContent =
+        new Date().toLocaleDateString('fr-FR', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+    }
+
+    function setPresence(id, status, btn) {
+      presences[id] = status;
+      const row = btn.closest('tr');
+      row.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updateSummary();
+    }
+
+    function setAll(status) {
+      etudiants.forEach(e => presences[e.id] = status);
+      renderTable();
+    }
+
+    function updateSummary() {
+      const vals = Object.values(presences);
+      document.getElementById('sum-present').textContent = vals.filter(v => v==='present').length + ' présents';
+      document.getElementById('sum-absent').textContent  = vals.filter(v => v==='absent').length  + ' absents';
+      document.getElementById('sum-retard').textContent  = vals.filter(v => v==='retard').length  + ' retards';
+    }
+
+    function savePresences() {
+      alert('✅ Feuille d\'appel validée et enregistrée avec succès !');
+    }
+
+    // Init
+    const today = new Date().toLocaleDateString('fr-FR', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+    document.getElementById('dateInfo').textContent = today;
+    renderTable();
+  </script>
+</body>
+</html>

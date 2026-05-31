@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestion Emploi du Temps - SmartCampus</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  
+  <style>
+    /* ── RESET ET VARIABLES ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sky: #b8f0f0;
+      --navy: #0d1b2a;
+      --teal: #0a9396;
+      --teal-light: #94d2bd;
+      --white: #f8fffe;
+      --alert: #e63946;
+      --alert-hover: #c1121f;
+      --course-web: rgba(10, 147, 150, 0.15);
+      --course-web-border: #0a9396;
+      --course-dev: rgba(0, 180, 216, 0.15);
+      --course-dev-border: #00b4d8;
+      --course-mkt: rgba(244, 162, 97, 0.15);
+      --course-mkt-border: #f4a261;
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--sky);
+      color: var(--navy);
+      overflow-x: hidden;
+    }
+
+    /* ── HERO BG DECORATION ── */
+    .bg-blob {
+      position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.35; pointer-events: none; z-index: 0;
+    }
+    .blob1 { width: 480px; height: 480px; background: var(--teal); top: -100px; left: -80px; }
+    .blob2 { width: 360px; height: 360px; background: #00b4d8; bottom: 60px; right: -60px; }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center;
+      background: var(--navy); padding: 0 2rem; height: 52px; z-index: 100;
+    }
+    .nav-logo-img { height: 32px; margin-right: 12px; border-radius: 4px; object-fit: contain; }
+    .nav-brand { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--white); letter-spacing: 0.04em; }
+    .nav-links { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+    .nav-links a {
+      font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--sky);
+      text-decoration: none; padding: 6px 14px; border-radius: 4px; transition: background .2s;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .nav-links a:hover, .nav-links a.active { background: var(--teal); color: #fff; }
+    .nav-bell { position: relative; font-size: 1.1rem; color: var(--sky); cursor: pointer; margin: 0 8px; }
+    .nav-bell::after { content: ''; position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--alert); border-radius: 50%; border: 2px solid var(--navy); }
+
+    /* ── LAYOUT PRINCIPAL ── */
+    .page-wrapper {
+      position: relative; z-index: 1; width: 100%; max-width: 1300px;
+      margin: 0 auto; padding: 6rem 1.5rem 5rem 1.5rem; display: flex; flex-direction: column; gap: 1.5rem;
+    }
+
+    .glass-panel {
+      background: rgba(255,255,255,0.65); backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.8); border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.06); padding: 1.5rem;
+    }
+
+    /* BARRE D'OUTILS DE FILTRAGE */
+    .top-actions {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .page-title {
+      font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--navy);
+      background: rgba(255,255,255,0.55); padding: 10px 20px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+    }
+    .filters-wrapper { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .filter-select {
+      background: rgba(255,255,255,0.8); border: 1.5px solid #cce0e0; border-radius: 10px;
+      padding: 10px 18px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--navy);
+      outline: none; cursor: pointer; min-width: 180px;
+    }
+    .btn-add {
+      background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff;
+      border: none; border-radius: 10px; padding: 12px 20px; font-family: 'Syne', sans-serif;
+      font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ── PLANNING / EMPLOI DU TEMPS ── */
+    .timetable-scroller { overflow-x: auto; width: 100%; }
+    .timetable-grid {
+      display: grid;
+      grid-template-columns: 80px repeat(5, minmax(180px, 1fr));
+      grid-template-rows: 45px repeat(10, 60px); /* 10 créneaux d'une heure de 8h à 18h */
+      width: 100%;
+    }
+
+    /* Cellules d'en-tête (Jours) */
+    .time-header {
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem;
+      display: flex; align-items: center; justify-content: center;
+      border-bottom: 2px solid rgba(13, 27, 42, 0.15); padding: 10px;
+      color: var(--navy); background: rgba(255,255,255,0.2);
+    }
+    /* Cellules de côté (Heures) */
+    .time-slot {
+      font-size: 0.85rem; font-weight: 700; color: #5a7a7a;
+      display: flex; align-items: center; justify-content: center;
+      border-right: 1px solid rgba(13, 27, 42, 0.08);
+      border-bottom: 1px solid rgba(13, 27, 42, 0.08);
+    }
+    /* Grille de fond pour les cours */
+    .grid-cell {
+      border-right: 1px solid rgba(13, 27, 42, 0.05);
+      border-bottom: 1px solid rgba(13, 27, 42, 0.05);
+    }
+
+    /* ── BLOCS DE COURS INTEGRÉS ── */
+    .course-card {
+      grid-row-span: 2; /* Par défaut, durée de 2h */
+      margin: 3px; padding: 10px; border-radius: 10px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+      position: relative; z-index: 2;
+    }
+    .course-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    
+    .course-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; line-height: 1.2; }
+    .course-info { font-size: 0.78rem; color: #4a5a5a; margin-top: 4px; line-height: 1.3; }
+    .course-room { font-size: 0.75rem; font-weight: 700; margin-top: auto; display: inline-block; background: rgba(255,255,255,0.5); padding: 2px 6px; border-radius: 4px; width: max-content; }
+
+    /* Variations de couleur des cours */
+    .type-web { background: var(--course-web); border-left: 4px solid var(--course-web-border); color: #005f73; }
+    .type-dev { background: var(--course-dev); border-left: 4px solid var(--course-dev-border); color: #0077b6; }
+    .type-mkt { background: var(--course-mkt); border-left: 4px solid var(--course-mkt-border); color: #9a031e; }
+
+    /* Positionnement des cours (Grid Row & Column) */
+    /* Colonnes : 2=Lun, 3=Mar, 4=Mer, 5=Jeu, 6=Ven */
+    /* Lignes : 2=8h, 3=9h, 4=10h, 5=11h, 6=12h, 7=13h, 8=14h, 9=15h, 10=16h, 11=17h */
+    .c-1 { grid-column: 2; grid-row: 2 / span 2; } /* Lundi 8h - 10h */
+    .c-2 { grid-column: 2; grid-row: 4 / span 2; } /* Lundi 10h - 12h */
+    .c-3 { grid-column: 3; grid-row: 2 / span 3; } /* Mardi 8h - 11h (3h) */
+    .c-4 { grid-column: 4; grid-row: 8 / span 2; } /* Mercredi 14h - 16h */
+    .c-5 { grid-column: 5; grid-row: 5 / span 2; } /* Jeudi 11h - 13h */
+    .c-6 { grid-column: 6; grid-row: 8 / span 3; } /* Vendredi 14h - 17h */
+
+    /* ── FENÊTRE MODALE D'ÉDITION / AJOUT ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(13,27,42,.45); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; z-index: 200;
+      opacity: 0; pointer-events: none; transition: opacity .3s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--white); border-radius: 20px; width: 500px; max-width: 94vw;
+      padding: 2rem; box-shadow: 0 28px 80px rgba(0,0,0,.18); position: relative;
+    }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; margin-bottom: 1.5rem; }
+    
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 1rem; }
+    .form-group label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; color: #3d5a5a; }
+    .form-group input, .form-group select { padding: 10px 14px; border: 1.5px solid #cce0e0; border-radius: 10px; font-family: 'DM Sans', sans-serif; outline: none; background: #f0fafa; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    
+    .modal-btns { display: flex; gap: 1rem; margin-top: 1.5rem; }
+    .btn-save { flex: 1; padding: 12px; background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; }
+    .btn-delete { padding: 12px; background: var(--alert); color: #fff; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; }
+    .btn-delete:hover { background: var(--alert-hover); }
+    .btn-close { position: absolute; top: 16px; right: 18px; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #6b8080; }
+
+    /* ── FOOTER ── */
+    footer {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 42px; background: var(--navy);
+      display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem; color: var(--teal-light); z-index: 100;
+    }
+    .nav-logout { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600; color: #ffb3b8; text-decoration: none; padding: 6px 14px; border-radius: 4px; border: 1px solid rgba(230,57,70,0.4); transition: all .2s; margin-left: 4px; }
+    .nav-logout:hover { background: var(--alert); color: #fff; border-color: var(--alert); }
+  </style>
+</head>
+<body>
+  <div class="bg-blob blob1"></div><div class="bg-blob blob2"></div>
+
+  <nav>
+    <img src="logo.jpg" alt="Logo" class="nav-logo-img">
+    <span class="nav-brand">SmartCampus</span>
+    <div class="nav-links">
+      <a href="menu_admin.html">Menu</a>
+      <a href="dashboard_admin.html">Tableau de bord</a>
+      <a href="#" class="active">Profil : Administrateur</a>
+      <a href="deconnexion.php" class="nav-logout">🚪 Déconnexion</a>
+
+
+  <main class="page-wrapper">
+    
+    <div class="top-actions">
+      <div class="page-title">Gestion Emploi du Temps</div>
+      
+      <div class="filters-wrapper">
+        <select class="filter-select" id="classeFilter">
+          <option value="M1_Info">Master 1 Informatique</option>
+          <option value="L3_Design">Licence 3 Web Design</option>
+          <option value="B2_Mkt">Bachelor 2 Marketing</option>
+        </select>
+        
+        <select class="filter-select" id="semaineFilter">
+          <option value="S22">Semaine du 25 Mai au 29 Mai</option>
+          <option value="S23">Semaine du 01 Juin au 05 Juin</option>
+        </select>
+
+        <button class="btn-add" onclick="openAddModal()">📅+ Ajouter un cours</button>
+      </div>
+    </div>
+
+    <div class="glass-panel timetable-scroller">
+      <div class="timetable-grid">
+        <div class="time-header" style="border-right: 1px solid rgba(13,27,42,0.15);">Heure</div>
+        <div class="time-header">Lundi</div>
+        <div class="time-header">Mardi</div>
+        <div class="time-header">Mercredi</div>
+        <div class="time-header">Jeudi</div>
+        <div class="time-header">Vendredi</div>
+
+        <div class="time-slot">08:00</div> <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+        <div class="time-slot">09:00</div> <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+        <div class="time-slot">10:00</div> <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+        <div class="time-slot">11:00</div> <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+        <div class="time-slot">12:00</div> <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+        <div class="time-slot">13:00</div> <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+        <div class="time-slot">14:00</div> <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+        <div class="time-slot">15:00</div> <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+        <div class="time-slot">16:00</div> <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+        <div class="time-slot">17:00</div> <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+
+        <div class="course-card type-dev c-1" onclick="openEditModal('Architecture Web', 'Dr. Julian Moreau', 'Amphi A', 'Lun', '08:00', '10:00')">
+          <span class="course-title">Architecture Web</span>
+          <span class="course-info">Enseignant : Dr. Moreau</span>
+          <span class="course-room">Amphi A</span>
+        </div>
+
+        <div class="course-card type-web c-2" onclick="openEditModal('UI/UX Design', 'Mme. Claire Dubois', 'Salle B204', 'Lun', '10:00', '12:00')">
+          <span class="course-title">UI/UX Design</span>
+          <span class="course-info">Enseignant : Mme. Dubois</span>
+          <span class="course-room">Salle B204</span>
+        </div>
+
+        <div class="course-card type-dev c-3" onclick="openEditModal('Algorithmique Avancée', 'Prof. Martin', 'Labo 3', 'Mar', '08:00', '11:00')">
+          <span class="course-title">Algorithmique Avancée</span>
+          <span class="course-info">Enseignant : Prof. Martin</span>
+          <span class="course-room">Labo 3</span>
+        </div>
+
+        <div class="course-card type-mkt c-4" onclick="openEditModal('Management de Projet', 'Mme. Robert', 'Salle C102', 'Mer', '14:00', '16:00')">
+          <span class="course-title">Management de Projet</span>
+          <span class="course-info">Enseignant : Mme. Robert</span>
+          <span class="course-room">Salle C102</span>
+        </div>
+
+        <div class="course-card type-web c-5" onclick="openEditModal('Culture Numérique', 'M. Petit', 'Amphi B', 'Jeu', '11:00', '13:00')">
+          <span class="course-title">Culture Numérique</span>
+          <span class="course-info">Enseignant : M. Petit</span>
+          <span class="course-room">Amphi B</span>
+        </div>
+
+        <div class="course-card type-dev c-6" onclick="openEditModal('Base de données NoSQL', 'Dr. Julian Moreau', 'Salle B301', 'Ven', '14:00', '17:00')">
+          <span class="course-title">Base de données NoSQL</span>
+          <span class="course-info">Enseignant : Dr. Moreau</span>
+          <span class="course-room">Salle B301</span>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="edtModal">
+    <div class="modal-box">
+      <button class="btn-close" onclick="closeModal()">✕</button>
+      <div class="modal-title" id="modalTitle">Éditer le cours</div>
+      
+      <form id="courseForm" onsubmit="saveCourse(event)">
+        <div class="form-group">
+          <label>Intitulé du Cours / Matière</label>
+          <input type="text" id="m-titre" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Enseignant Affecté</label>
+          <select id="m-prof" required>
+            <option value="Dr. Julian Moreau">Dr. Julian Moreau</option>
+            <option value="Mme. Claire Dubois">Mme. Claire Dubois</option>
+            <option value="Prof. Martin">Prof. Martin</option>
+            <option value="Mme. Robert">Mme. Robert</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Salle de classe</label>
+          <input type="text" id="m-salle" required placeholder="Ex: Salle B204">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Jour</label>
+            <select id="m-jour" required>
+              <option value="Lun">Lundi</option>
+              <option value="Mar">Mardi</option>
+              <option value="Mer">Mercredi</option>
+              <option value="Jeu">Jeudi</option>
+              <option value="Ven">Vendredi</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Heure de Début</label>
+            <input type="time" id="m-debut" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Heure de Fin</label>
+          <input type="time" id="m-fin" required>
+        </div>
+
+        <div class="modal-btns">
+          <button type="button" class="btn-delete" id="btnDeleteCourse" onclick="deleteCourse()">🗑️ Supprimer</button>
+          <button type="submit" class="btn-save">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>© 2026 SmartCampus — Tous droits réservés</footer>
+
+  <script>
+    const modal = document.getElementById('edtModal');
+
+    // 1. Ouvrir la modale en mode EDITION (clic sur un cours existant)
+    function openEditModal(titre, prof, salle, jour, debut, fin) {
+      document.getElementById('modalTitle').innerText = "Modifier le créneau de cours";
+      document.getElementById('btnDeleteCourse').style.display = "block"; // Affiche le bouton supprimer
+      
+      // Pré-remplit les inputs
+      document.getElementById('m-titre').value = titre;
+      document.getElementById('m-prof').value = prof;
+      document.getElementById('m-salle').value = salle;
+      document.getElementById('m-jour').value = jour;
+      document.getElementById('m-debut').value = debut;
+      document.getElementById('m-fin').value = fin;
+
+      modal.classList.add('open');
+    }
+
+    // 2. Ouvrir la modale en mode AJOUT (clic sur le bouton du haut)
+    function openAddModal() {
+      document.getElementById('modalTitle').innerText = "Planifier un nouveau cours";
+      document.getElementById('btnDeleteCourse').style.display = "none"; // Masque supprimer
+      
+      // Réinitialise le formulaire
+      document.getElementById('courseForm').reset();
+      modal.classList.add('open');
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+    }
+
+    // 3. Action de sauvegarde
+    function saveCourse(event) {
+      event.preventDefault();
+      const titre = document.getElementById('m-titre').value;
+      alert("Le cours de \"" + titre + "\" a été planifié/modifié avec succès dans l'emploi du temps !");
+      closeModal();
+    }
+
+    // 4. Action de suppression avec sécurité intégrée
+    function deleteCourse() {
+      const titre = document.getElementById('m-titre').value;
+      const validation = confirm("⚠️ Sécurité - Emploi du Temps :\nÊtes-vous sûr de vouloir retirer le cours de \"" + titre + "\" de cette semaine ?");
+      if(validation) {
+        alert("Le cours a été retiré.");
+        closeModal();
+      }
+    }
+  </script>
+</body>
+</html>
