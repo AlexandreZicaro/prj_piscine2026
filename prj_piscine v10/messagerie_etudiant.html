@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Messagerie Étudiant - SmartCampus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --sky: #b8f0f0; --navy: #0d1b2a; --teal: #0a9396; --teal-light: #94d2bd; --white: #f8fffe; --alert: #e63946; --success: #2a9d8f; --warning: #f4a261; }
+    html, body { min-height: 100vh; font-family: 'DM Sans', sans-serif; background: var(--sky); color: var(--navy); }
+    .bg-blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.35; pointer-events: none; z-index: 0; }
+    .blob1 { width: 480px; height: 480px; background: var(--teal); top: -100px; left: -80px; }
+    .blob2 { width: 360px; height: 360px; background: #00b4d8; bottom: 60px; right: -60px; }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; background: var(--navy); padding: 0 2rem; height: 52px; z-index: 100; }
+    .nav-logo-img { height: 32px; margin-right: 12px; border-radius: 4px; object-fit: contain; }
+    .nav-brand { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--white); letter-spacing: 0.04em; }
+    .nav-links { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+    .nav-links a { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--sky); text-decoration: none; padding: 6px 14px; border-radius: 4px; transition: background .2s; letter-spacing: 0.04em; text-transform: uppercase; }
+    .nav-links a:hover, .nav-links a.active { background: var(--teal); color: #fff; }
+
+    .page-wrapper { position: relative; z-index: 1; width: 100%; max-width: 1200px; margin: 0 auto; padding: 6rem 1.5rem 5rem; }
+
+    .messagerie-container { background: rgba(255,255,255,0.65); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.8); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,.08); display: flex; flex-direction: column; overflow: hidden; }
+    .messagerie-header { padding: 20px 30px; border-bottom: 2px solid rgba(13,27,42,0.08); display: flex; justify-content: space-between; align-items: center; }
+    .messagerie-header h1 { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--navy); }
+    .btn-compose { background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: transform 0.2s; }
+    .btn-compose:hover { transform: translateY(-2px); }
+
+    .messagerie-body { display: flex; min-height: 550px; }
+    .messagerie-sidebar { width: 240px; border-right: 2px solid rgba(13,27,42,0.08); background: rgba(255,255,255,0.3); padding: 20px 0; }
+    .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+    .sidebar-menu li { padding: 14px 24px; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.95rem; color: var(--navy); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
+    .sidebar-menu li:hover, .sidebar-menu li.active { background: rgba(10,147,150,0.12); color: var(--teal); }
+    .sidebar-menu li.active { border-left: 4px solid var(--teal); }
+    .badge { font-size: 0.72rem; font-weight: 700; background: var(--teal); color: var(--white); padding: 3px 8px; border-radius: 12px; }
+    .badge.red { background: var(--alert); }
+
+    .messagerie-content { flex: 1; padding: 30px 40px; display: flex; flex-direction: column; gap: 20px; }
+    .view-pane { display: none; flex-direction: column; gap: 16px; }
+    .view-pane.active { display: flex; }
+
+    .email-list { display: flex; flex-direction: column; gap: 10px; }
+    .email-item { background: rgba(255,255,255,0.6); border: 1px solid rgba(13,27,42,0.06); border-radius: 10px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; }
+    .email-item:hover { background: #fff; transform: translateX(4px); border-color: var(--teal-light); }
+    .email-item.unread { background: rgba(255,255,255,0.9); border-left: 4px solid var(--teal); font-weight: 700; }
+    .email-meta { display: flex; flex-direction: column; gap: 4px; }
+    .email-sender { font-size: 0.95rem; color: var(--navy); font-weight: 700; }
+    .email-subject { font-size: 0.88rem; color: #4a5a5a; }
+    .email-date { font-size: 0.8rem; color: #6b8080; }
+
+    /* Formulaire */
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+    .input-group label { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #4a6a6a; }
+    .msg-input, .msg-textarea, .msg-select { width: 100%; background: rgba(255,255,255,0.8); border: 1.5px solid #cce0e0; border-radius: 10px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--navy); outline: none; transition: border-color 0.2s; }
+    .msg-input:focus, .msg-textarea:focus, .msg-select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(10,147,150,.12); background: #fff; }
+    .msg-textarea { resize: vertical; min-height: 200px; }
+    .btn-submit { background: linear-gradient(135deg, var(--teal), #00b4d8); color: #fff; border: none; border-radius: 10px; padding: 12px 36px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; align-self: flex-end; }
+    .btn-submit:hover { opacity: 0.9; }
+
+    /* Lecteur */
+    .reader-overlay { position: fixed; inset: 0; background: rgba(13,27,42,.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 300; opacity: 0; pointer-events: none; transition: opacity .3s; }
+    .reader-overlay.open { opacity: 1; pointer-events: all; }
+    .reader-box { background: var(--white); border-radius: 16px; width: 560px; max-width: 94vw; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,.2); position: relative; }
+    .reader-title { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--navy); margin-bottom: 8px; }
+    .reader-meta { font-size: 0.85rem; color: #6b8080; margin-bottom: 1.2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(13,27,42,0.1); }
+    .reader-body { font-size: 0.95rem; color: var(--navy); line-height: 1.7; white-space: pre-wrap; }
+    .btn-close-reader { position: absolute; top: 14px; right: 18px; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #6b8080; }
+
+    footer { position: fixed; bottom: 0; left: 0; right: 0; height: 42px; background: var(--navy); display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--teal-light); z-index: 100; }
+    .nav-logout { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600; color: #ffb3b8; text-decoration: none; padding: 6px 14px; border-radius: 4px; border: 1px solid rgba(230,57,70,0.4); transition: all .2s; margin-left: 4px; }
+    .nav-logout:hover { background: var(--alert); color: #fff; border-color: var(--alert); }
+  </style>
+</head>
+<body>
+  <div class="bg-blob blob1"></div>
+  <div class="bg-blob blob2"></div>
+
+  <nav>
+    <img src="logo.jpg" alt="Logo" class="nav-logo-img">
+    <span class="nav-brand">SmartCampus</span>
+    <div class="nav-links">
+      <a href="dashboard_etudiant.php">Mon espace</a>
+      <a href="messagerie_etudiant.php" class="active">Messagerie</a>
+      <a href="#">Profil : Étudiant</a>
+      <a href="deconnexion.php" class="nav-logout">🚪 Déconnexion</a>
+
+
+  <main class="page-wrapper">
+    <div class="messagerie-container">
+      <div class="messagerie-header">
+        <h1>💬 Ma Messagerie</h1>
+        <button class="btn-compose" onclick="switchPane('pane-compose')">✏️ Nouveau message</button>
+      </div>
+
+      <div class="messagerie-body">
+        <ul class="sidebar-menu">
+          <li class="active" id="menu-inbox" onclick="switchPane('pane-inbox')">📥 Réception <span class="badge red">1</span></li>
+          <li id="menu-sent" onclick="switchPane('pane-sent')">📤 Envoyés</li>
+        </ul>
+
+        <div class="messagerie-content">
+
+          <!-- INBOX -->
+          <div class="view-pane active" id="pane-inbox">
+            <div class="email-list">
+              <div class="email-item unread" onclick="readEmail('Dr. Moreau', 'Résultats CC1 Algorithmique', 'Bonjour,\n\nLes résultats du CC1 d\'Algorithmique viennent d\'être publiés sur le portail SmartCampus.\n\nVotre note : 14/20. Bon travail, continuez ainsi !\n\nCordialement,\nDr. Julian Moreau')">
+                <div class="email-meta">
+                  <span class="email-sender">Dr. Moreau (Algorithmique)</span>
+                  <span class="email-subject">Sujet : Résultats CC1 Algorithmique</span>
+                </div>
+                <div class="email-date">Aujourd'hui</div>
+              </div>
+              <div class="email-item" onclick="readEmail('Administration SmartCampus', 'Calendrier des examens S2', 'Bonjour à tous,\n\nVous trouverez ci-dessous le calendrier des examens du Semestre 2 :\n\n• Algorithmique — 12 Juin 2026 · Salle A001\n• Bases de données — 18 Juin 2026 · Salle B204\n• Réseaux — 25 Juin 2026 · Salle C301\n\nBonne préparation à tous.\n\nL\'Administration SmartCampus')">
+                <div class="email-meta">
+                  <span class="email-sender">Administration SmartCampus</span>
+                  <span class="email-subject">Sujet : Calendrier des examens S2</span>
+                </div>
+                <div class="email-date">Hier</div>
+              </div>
+              <div class="email-item" onclick="readEmail('Mme. Dubois (Structures de données)', 'Supports de cours disponibles', 'Bonjour,\n\nLes slides du cours de Structures de données (Chapitre 3 - Arbres binaires) sont disponibles sur l\'ENT.\n\nBonne révision !\n\nClaire Dubois')">
+                <div class="email-meta">
+                  <span class="email-sender">Mme. Dubois (Structures de données)</span>
+                  <span class="email-subject">Sujet : Supports de cours disponibles</span>
+                </div>
+                <div class="email-date">Lundi</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- COMPOSE -->
+          <div class="view-pane" id="pane-compose">
+            <div class="input-group">
+              <label>Destinataire</label>
+              <select class="msg-select" id="destinataire">
+                <option value="" disabled selected>Choisir un enseignant ou l'administration</option>
+                <option value="julian.moreau@smartcampus.fr">Dr. Julian Moreau (Algorithmique / Bases de données)</option>
+                <option value="claire.dubois@smartcampus.fr">Mme. Claire Dubois (Structures de données)</option>
+                <option value="paul.martin@smartcampus.fr">M. Paul Martin (Réseaux et Télécoms)</option>
+                <option value="admin@smartcampus.fr">Administration SmartCampus</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Objet du message</label>
+              <input type="text" class="msg-input" id="msg-objet" placeholder="Ex : Question sur le CC1 d'Algorithmique" />
+            </div>
+            <div class="input-group">
+              <label>Message</label>
+              <textarea class="msg-textarea" id="msg-corps" placeholder="Rédigez votre message ici..."></textarea>
+            </div>
+            <button class="btn-submit" onclick="sendMessage()">📨 Envoyer</button>
+          </div>
+
+          <!-- SENT -->
+          <div class="view-pane" id="pane-sent">
+            <div class="email-list" id="sentList">
+              <p style="color:#6b8080;font-style:italic;">Aucun message envoyé pour le moment.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- LECTEUR -->
+  <div class="reader-overlay" id="readerOverlay">
+    <div class="reader-box">
+      <button class="btn-close-reader" onclick="closeReader()">✕</button>
+      <div class="reader-title" id="readSubject"></div>
+      <div class="reader-meta">De : <strong id="readSender"></strong></div>
+      <div class="reader-body" id="readBody"></div>
+    </div>
+  </div>
+
+  <footer>© 2026 SmartCampus — Tous droits réservés</footer>
+
+  <script>
+    const sentMessages = [];
+
+    function switchPane(id) {
+      document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.sidebar-menu li').forEach(li => li.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if (id === 'pane-inbox') document.getElementById('menu-inbox').classList.add('active');
+      if (id === 'pane-sent') document.getElementById('menu-sent').classList.add('active');
+    }
+
+    function readEmail(sender, subject, body) {
+      document.getElementById('readSender').innerText = sender;
+      document.getElementById('readSubject').innerText = subject;
+      document.getElementById('readBody').innerText = body;
+      document.getElementById('readerOverlay').classList.add('open');
+    }
+
+    function closeReader() {
+      document.getElementById('readerOverlay').classList.remove('open');
+    }
+
+    function sendMessage() {
+      const dest = document.getElementById('destinataire').value;
+      const objet = document.getElementById('msg-objet').value.trim();
+      const corps = document.getElementById('msg-corps').value.trim();
+      if (!dest || !objet || !corps) {
+        alert('Veuillez remplir tous les champs avant d\'envoyer.');
+        return;
+      }
+      sentMessages.push({ dest, objet, corps });
+      renderSent();
+      document.getElementById('destinataire').value = '';
+      document.getElementById('msg-objet').value = '';
+      document.getElementById('msg-corps').value = '';
+      alert('✅ Votre message a bien été envoyé !');
+      switchPane('pane-sent');
+    }
+
+    function renderSent() {
+      const list = document.getElementById('sentList');
+      if (!sentMessages.length) {
+        list.innerHTML = '<p style="color:#6b8080;font-style:italic;">Aucun message envoyé pour le moment.</p>';
+        return;
+      }
+      list.innerHTML = sentMessages.map(m => `
+        <div class="email-item" onclick="readEmail('${m.dest}','${m.objet}','${m.corps}')">
+          <div class="email-meta">
+            <span class="email-sender">À : ${m.dest}</span>
+            <span class="email-subject">Sujet : ${m.objet}</span>
+          </div>
+          <div class="email-date">Maintenant</div>
+        </div>`).join('');
+    }
+
+    document.addEventListener('click', e => {
+      if (e.target === document.getElementById('readerOverlay'))
+        document.getElementById('readerOverlay').classList.remove('open');
+    });
+  </script>
+</body>
+</html>
